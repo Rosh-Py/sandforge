@@ -53,6 +53,7 @@ function createSandboxHTML(code: string): string {
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8" />
   <style>
     body { margin: 0; background: #0a0e17; color: #e2e8f0; font-family: monospace; }
   </style>
@@ -100,7 +101,7 @@ function createSandboxHTML(code: string): string {
     };
     
     // Signal that we're starting
-    window.parent.postMessage({ source: '${SANDBOX_SOURCE}', type: 'system', message: '⚡ Execution started...' }, '*');
+    window.parent.postMessage({ source: '${SANDBOX_SOURCE}', type: 'system', message: '🏃 Execution started...' }, '*');
   <\/script>
   <script type="module">
     try {
