@@ -174,7 +174,6 @@ describe("FileExplorer ↔ Store integration", () => {
       expect(screen.getByPlaceholderText("filename.ts")).toBeInTheDocument();
     });
 
-    const input = screen.getByPlaceholderText("filename.ts");
     // Tab away to trigger blur
     await user.tab();
 

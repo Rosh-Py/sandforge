@@ -3,27 +3,8 @@ import Editor, { type OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { useSandboxStore } from "../store/sandboxStore";
 import { EDITOR_THEME } from "../constants";
+import { getLanguage } from "../utils/editorUtils";
 
-// Map file extensions to Monaco language IDs
-export function getLanguage(filename: string): string {
-  const ext = filename.split(".").pop()?.toLowerCase();
-  switch (ext) {
-    case "ts":
-    case "tsx":
-      return "typescript";
-    case "js":
-    case "jsx":
-      return "javascript";
-    case "json":
-      return "json";
-    case "html":
-      return "html";
-    case "css":
-      return "css";
-    default:
-      return "plaintext";
-  }
-}
 
 export function CodeEditor() {
   const { files, activeFile, updateFileContent } = useSandboxStore();

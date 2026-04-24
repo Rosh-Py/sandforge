@@ -9,7 +9,7 @@ import { describe, it, expect } from "vitest";
 // ─── Import getLanguage from the real source ─────────────────────────
 // Previously re-implemented here (bad practice). Now tests the actual export.
 
-import { getLanguage } from "../../components/CodeEditor";
+import { getLanguage } from "../../utils/editorUtils";
 
 describe("getLanguage", () => {
   it.each([

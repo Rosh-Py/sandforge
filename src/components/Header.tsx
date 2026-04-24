@@ -47,9 +47,6 @@ export function Header() {
           <div className="font-display from-neon-green to-neon-cyan bg-gradient-to-br bg-clip-text text-[14px] font-[700] tracking-[3px] text-transparent uppercase">
             {APP_NAME}
           </div>
-          <div className="text-text-tertiary font-mono text-[10px] tracking-[1px]">
-            sandbox v1.0
-          </div>
         </div>
       </div>
 
