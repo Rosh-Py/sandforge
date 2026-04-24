@@ -1,12 +1,18 @@
-import { useSandboxStore, type LogEntry } from '../store/sandboxStore';
-import { SANDBOX_SOURCE } from '../constants';
+import { useSandboxStore, type LogEntry } from "../store/sandboxStore";
+import { SANDBOX_SOURCE } from "../constants";
 
-type LogType = LogEntry['type'];
+type LogType = LogEntry["type"];
 
-const VALID_LOG_TYPES = new Set<string>(['log', 'warn', 'error', 'info', 'system']);
+const VALID_LOG_TYPES = new Set<string>([
+  "log",
+  "warn",
+  "error",
+  "info",
+  "system",
+]);
 
 export function isLogType(value: unknown): value is LogType {
-  return typeof value === 'string' && VALID_LOG_TYPES.has(value);
+  return typeof value === "string" && VALID_LOG_TYPES.has(value);
 }
 
 interface SandboxMessageBase {
@@ -19,19 +25,22 @@ interface SandboxLogMessage extends SandboxMessageBase {
 }
 
 interface SandboxDoneMessage extends SandboxMessageBase {
-  type: 'done';
+  type: "done";
 }
 
 interface SandboxClearMessage extends SandboxMessageBase {
-  type: 'clear';
+  type: "clear";
 }
 
-type SandboxMessage = SandboxLogMessage | SandboxDoneMessage | SandboxClearMessage;
+type SandboxMessage =
+  | SandboxLogMessage
+  | SandboxDoneMessage
+  | SandboxClearMessage;
 
 export function isSandboxMessage(data: unknown): data is SandboxMessage {
-  if (typeof data !== 'object' || data === null) return false;
+  if (typeof data !== "object" || data === null) return false;
   const record = data as Record<string, unknown>;
-  return record.source === SANDBOX_SOURCE && typeof record.type === 'string';
+  return record.source === SANDBOX_SOURCE && typeof record.type === "string";
 }
 
 /**
@@ -125,22 +134,23 @@ export function executeInSandbox(code: string): void {
   // Clean up previous sandbox
   destroySandbox();
 
-  store.setExecutionStatus('running');
+  store.setExecutionStatus("running");
 
   // Create a new iframe
-  const iframe = document.createElement('iframe');
-  iframe.style.display = 'none';
-  iframe.sandbox.add('allow-scripts');
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  iframe.sandbox.add("allow-scripts");
   document.body.appendChild(iframe);
   currentIframe = iframe;
 
   // Listen for messages from the sandbox
   const timeoutId = setTimeout(() => {
     store.addLog({
-      type: 'error',
-      message: '⏱ Execution timeout (10s). Possible infinite loop detected. Sandbox terminated.',
+      type: "error",
+      message:
+        "⏱ Execution timeout (10s). Possible infinite loop detected. Sandbox terminated.",
     });
-    store.setExecutionStatus('error');
+    store.setExecutionStatus("error");
     destroySandbox();
   }, 10000);
 
@@ -148,30 +158,30 @@ export function executeInSandbox(code: string): void {
     const data: unknown = event.data;
     if (!isSandboxMessage(data)) return;
 
-    if (data.type === 'done') {
+    if (data.type === "done") {
       clearTimeout(timeoutId);
-      store.setExecutionStatus('success');
+      store.setExecutionStatus("success");
       // Keep iframe alive for a bit to catch async logs
       setTimeout(() => destroySandbox(), 3000);
       return;
     }
 
-    if (data.type === 'clear') {
+    if (data.type === "clear") {
       store.clearLogs();
       return;
     }
 
     store.addLog({
-      type: isLogType(data.type) ? data.type : 'log',
+      type: isLogType(data.type) ? data.type : "log",
       message: data.message,
     });
   };
 
-  window.addEventListener('message', messageHandler);
+  window.addEventListener("message", messageHandler);
 
   // Write the sandbox HTML
   const html = createSandboxHTML(code);
-  const blob = new Blob([html], { type: 'text/html' });
+  const blob = new Blob([html], { type: "text/html" });
   iframe.src = URL.createObjectURL(blob);
 }
 
@@ -180,11 +190,11 @@ export function executeInSandbox(code: string): void {
  */
 export function destroySandbox(): void {
   if (messageHandler) {
-    window.removeEventListener('message', messageHandler);
+    window.removeEventListener("message", messageHandler);
     messageHandler = null;
   }
   if (currentIframe) {
-    if (currentIframe.src.startsWith('blob:')) {
+    if (currentIframe.src.startsWith("blob:")) {
       URL.revokeObjectURL(currentIframe.src);
     }
     currentIframe.remove();

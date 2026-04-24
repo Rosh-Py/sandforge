@@ -1,21 +1,29 @@
-import { useEffect, useCallback, useState } from 'react';
-import { APP_NAME_UPPER } from './constants';
-import { Header, EditorToolbar } from './components/Header';
-import { FileExplorer } from './components/FileExplorer';
-import { CodeEditor } from './components/CodeEditor';
-import { Terminal } from './components/Terminal';
-import { useSandboxStore } from './store/sandboxStore';
-import { initBundler, bundle } from './services/bundler';
-import { executeInSandbox } from './services/executor';
+import { useEffect, useCallback, useState } from "react";
+import { APP_NAME_UPPER } from "./constants";
+import { Header, EditorToolbar } from "./components/Header";
+import { FileExplorer } from "./components/FileExplorer";
+import { CodeEditor } from "./components/CodeEditor";
+import { Terminal } from "./components/Terminal";
+import { useSandboxStore } from "./store/sandboxStore";
+import { initBundler, bundle } from "./services/bundler";
+import { executeInSandbox } from "./services/executor";
 
 function LoadingScreen() {
   return (
-    <div className="loading-screen" role="status" aria-label="Loading">
-      <div className="loading-screen__title">{APP_NAME_UPPER}</div>
-      <div className="loading-screen__bar">
-        <div className="loading-screen__bar-fill" />
+    <div
+      className="bg-bg-primary fixed inset-0 z-[10000] flex flex-col items-center justify-center gap-[24px]"
+      role="status"
+      aria-label="Loading"
+    >
+      <div className="font-display from-neon-green via-neon-cyan to-neon-purple bg-gradient-to-br bg-clip-text text-[28px] font-[800] tracking-[6px] text-transparent uppercase">
+        {APP_NAME_UPPER}
       </div>
-      <div className="loading-screen__text">Initializing WASM Engine...</div>
+      <div className="bg-bg-tertiary h-[2px] w-[200px] overflow-hidden rounded-[1px]">
+        <div className="from-neon-green to-neon-cyan h-full animate-[loading-bar_2s_ease-in-out_infinite] rounded-[1px] bg-gradient-to-r shadow-[0_0_8px_var(--color-neon-green-glow-strong)]" />
+      </div>
+      <div className="text-text-tertiary font-mono text-[12px] tracking-[2px]">
+        Initializing WASM Engine...
+      </div>
     </div>
   );
 }
@@ -41,9 +49,9 @@ export default function App() {
         // Small delay for the splash screen effect
         setTimeout(() => setIsLoading(false), 800);
       } catch (err: unknown) {
-        console.error('Failed to init bundler:', err);
+        console.error("Failed to init bundler:", err);
         addLog({
-          type: 'error',
+          type: "error",
           message: `Failed to initialize bundler: ${err instanceof Error ? err.message : String(err)}`,
         });
         setIsLoading(false);
@@ -55,24 +63,24 @@ export default function App() {
   // Run the code: bundle → execute
   const handleRun = useCallback(async () => {
     clearLogs();
-    setExecutionStatus('bundling');
+    setExecutionStatus("bundling");
 
     addLog({
-      type: 'system',
-      message: '🔧 Bundling with esbuild-wasm...',
+      type: "system",
+      message: "🔧 Bundling with esbuild-wasm...",
     });
 
     const { code, error } = await bundle(files);
 
     if (error) {
-      addLog({ type: 'error', message: error });
-      setExecutionStatus('error');
+      addLog({ type: "error", message: error });
+      setExecutionStatus("error");
       return;
     }
 
     addLog({
-      type: 'system',
-      message: '✅ Bundle complete. Executing in sandbox...',
+      type: "system",
+      message: "✅ Bundle complete. Executing in sandbox...",
     });
 
     executeInSandbox(code);
@@ -81,15 +89,15 @@ export default function App() {
   // Global keyboard shortcut: Ctrl/Cmd + Enter to run
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
         e.preventDefault();
         if (isBundlerReady) {
           handleRun();
         }
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleRun, isBundlerReady]);
 
   if (isLoading) {
@@ -97,11 +105,11 @@ export default function App() {
   }
 
   return (
-    <div className="app-container">
+    <div className="bg-bg-primary app-container relative flex h-screen w-screen flex-col overflow-hidden">
       <Header />
-      <main className="main-content" role="main">
+      <main className="flex flex-1 overflow-hidden" role="main">
         <FileExplorer />
-        <div className="editor-area">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <EditorToolbar onRun={handleRun} />
           <CodeEditor />
           <Terminal />

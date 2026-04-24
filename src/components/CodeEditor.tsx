@@ -1,27 +1,27 @@
-import { useRef, useEffect } from 'react';
-import Editor, { type OnMount } from '@monaco-editor/react';
-import type { editor } from 'monaco-editor';
-import { useSandboxStore } from '../store/sandboxStore';
-import { EDITOR_THEME } from '../constants';
+import { useRef, useEffect } from "react";
+import Editor, { type OnMount } from "@monaco-editor/react";
+import type { editor } from "monaco-editor";
+import { useSandboxStore } from "../store/sandboxStore";
+import { EDITOR_THEME } from "../constants";
 
 // Map file extensions to Monaco language IDs
 export function getLanguage(filename: string): string {
-  const ext = filename.split('.').pop()?.toLowerCase();
+  const ext = filename.split(".").pop()?.toLowerCase();
   switch (ext) {
-    case 'ts':
-    case 'tsx':
-      return 'typescript';
-    case 'js':
-    case 'jsx':
-      return 'javascript';
-    case 'json':
-      return 'json';
-    case 'html':
-      return 'html';
-    case 'css':
-      return 'css';
+    case "ts":
+    case "tsx":
+      return "typescript";
+    case "js":
+    case "jsx":
+      return "javascript";
+    case "json":
+      return "json";
+    case "html":
+      return "html";
+    case "css":
+      return "css";
     default:
-      return 'plaintext';
+      return "plaintext";
   }
 }
 
@@ -29,7 +29,7 @@ export function CodeEditor() {
   const { files, activeFile, updateFileContent } = useSandboxStore();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
-  const currentContent = files[activeFile] ?? '';
+  const currentContent = files[activeFile] ?? "";
 
   const handleMount: OnMount = (editorInstance) => {
     editorRef.current = editorInstance;
@@ -51,21 +51,24 @@ export function CodeEditor() {
 
   if (!activeFile) {
     return (
-      <div className="editor-container" style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'var(--font-mono)',
-        fontSize: '14px',
-        color: 'var(--text-muted)',
-      }}>
+      <div
+        className="bg-bg-primary flex-1 overflow-hidden"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "var(--font-mono)",
+          fontSize: "14px",
+          color: "var(--text-muted)",
+        }}
+      >
         Create or select a file to start coding
       </div>
     );
   }
 
   return (
-    <div className="editor-container">
+    <div className="bg-bg-primary flex-1 overflow-hidden">
       <Editor
         key={activeFile}
         height="100%"
@@ -77,38 +80,38 @@ export function CodeEditor() {
         beforeMount={(monaco) => {
           // Define custom theme
           monaco.editor.defineTheme(EDITOR_THEME, {
-            base: 'vs-dark',
+            base: "vs-dark",
             inherit: true,
             rules: [
-              { token: 'comment', foreground: '3d4556', fontStyle: 'italic' },
-              { token: 'keyword', foreground: 'b44aff' },
-              { token: 'string', foreground: '00ff9d' },
-              { token: 'number', foreground: 'ffd600' },
-              { token: 'type', foreground: '00e5ff' },
-              { token: 'function', foreground: '00e5ff' },
-              { token: 'variable', foreground: 'e2e8f0' },
-              { token: 'operator', foreground: 'ff2d75' },
-              { token: 'delimiter', foreground: '8892a8' },
+              { token: "comment", foreground: "3d4556", fontStyle: "italic" },
+              { token: "keyword", foreground: "b44aff" },
+              { token: "string", foreground: "00ff9d" },
+              { token: "number", foreground: "ffd600" },
+              { token: "type", foreground: "00e5ff" },
+              { token: "function", foreground: "00e5ff" },
+              { token: "variable", foreground: "e2e8f0" },
+              { token: "operator", foreground: "ff2d75" },
+              { token: "delimiter", foreground: "8892a8" },
             ],
             colors: {
-              'editor.background': '#0a0e17',
-              'editor.foreground': '#e2e8f0',
-              'editor.lineHighlightBackground': '#151b2b',
-              'editor.selectionBackground': '#1e274044',
-              'editorCursor.foreground': '#00ff9d',
-              'editor.selectionHighlightBackground': '#00ff9d15',
-              'editorLineNumber.foreground': '#3d4556',
-              'editorLineNumber.activeForeground': '#8892a8',
-              'editorIndentGuide.background1': '#1e2740',
-              'editorIndentGuide.activeBackground1': '#3d4556',
-              'editorWidget.background': '#0f1420',
-              'editorWidget.border': '#1e2740',
-              'editorSuggestWidget.background': '#0f1420',
-              'editorSuggestWidget.border': '#1e2740',
-              'editorSuggestWidget.selectedBackground': '#1e2740',
-              'scrollbarSlider.background': '#1e274080',
-              'scrollbarSlider.hoverBackground': '#3d4556',
-              'minimap.background': '#0a0e17',
+              "editor.background": "#0a0e17",
+              "editor.foreground": "#e2e8f0",
+              "editor.lineHighlightBackground": "#151b2b",
+              "editor.selectionBackground": "#1e274044",
+              "editorCursor.foreground": "#00ff9d",
+              "editor.selectionHighlightBackground": "#00ff9d15",
+              "editorLineNumber.foreground": "#3d4556",
+              "editorLineNumber.activeForeground": "#8892a8",
+              "editorIndentGuide.background1": "#1e2740",
+              "editorIndentGuide.activeBackground1": "#3d4556",
+              "editorWidget.background": "#0f1420",
+              "editorWidget.border": "#1e2740",
+              "editorSuggestWidget.background": "#0f1420",
+              "editorSuggestWidget.border": "#1e2740",
+              "editorSuggestWidget.selectedBackground": "#1e2740",
+              "scrollbarSlider.background": "#1e274080",
+              "scrollbarSlider.hoverBackground": "#3d4556",
+              "minimap.background": "#0a0e17",
             },
           });
 
@@ -116,7 +119,8 @@ export function CodeEditor() {
           monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             target: monaco.languages.typescript.ScriptTarget.ESNext,
             module: monaco.languages.typescript.ModuleKind.ESNext,
-            moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+            moduleResolution:
+              monaco.languages.typescript.ModuleResolutionKind.NodeJs,
             allowSyntheticDefaultImports: true,
             esModuleInterop: true,
             jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
@@ -132,10 +136,10 @@ export function CodeEditor() {
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
           smoothScrolling: true,
-          cursorBlinking: 'smooth',
-          cursorSmoothCaretAnimation: 'on',
-          renderLineHighlight: 'all',
-          renderWhitespace: 'selection',
+          cursorBlinking: "smooth",
+          cursorSmoothCaretAnimation: "on",
+          renderLineHighlight: "all",
+          renderWhitespace: "selection",
           bracketPairColorization: { enabled: true },
           guides: {
             bracketPairs: true,
@@ -149,7 +153,7 @@ export function CodeEditor() {
           },
           tabSize: 2,
           automaticLayout: true,
-          wordWrap: 'on',
+          wordWrap: "on",
         }}
       />
     </div>

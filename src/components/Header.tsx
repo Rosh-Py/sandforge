@@ -1,54 +1,67 @@
-import { Play, Square, Zap } from 'lucide-react';
-import { useSandboxStore } from '../store/sandboxStore';
-import { APP_NAME } from '../constants';
+import { Play, Square, Zap } from "lucide-react";
+import { useSandboxStore } from "../store/sandboxStore";
+import { APP_NAME } from "../constants";
 
 export function Header() {
   const { executionStatus, isBundlerReady } = useSandboxStore();
 
   const getStatusText = () => {
-    if (!isBundlerReady) return 'Initializing WASM...';
+    if (!isBundlerReady) return "Initializing WASM...";
     switch (executionStatus) {
-      case 'bundling':
-        return 'Bundling...';
-      case 'running':
-        return 'Executing...';
-      case 'error':
-        return 'Error';
-      case 'success':
-        return 'Done';
+      case "bundling":
+        return "Bundling...";
+      case "running":
+        return "Executing...";
+      case "error":
+        return "Error";
+      case "success":
+        return "Done";
       default:
-        return 'Ready';
+        return "Ready";
     }
   };
 
   const getStatusDotClass = () => {
-    if (!isBundlerReady) return 'header__status-dot--running';
+    if (!isBundlerReady)
+      return "header__status-dot--running bg-neon-yellow shadow-[0_0_6px_var(--color-neon-yellow)]";
     switch (executionStatus) {
-      case 'error':
-        return 'header__status-dot--error';
-      case 'bundling':
-      case 'running':
-        return 'header__status-dot--running';
+      case "error":
+        return "header__status-dot--error bg-neon-pink shadow-[0_0_6px_var(--color-neon-pink)]";
+      case "bundling":
+      case "running":
+        return "header__status-dot--running bg-neon-yellow shadow-[0_0_6px_var(--color-neon-yellow)]";
       default:
-        return '';
+        return "bg-neon-green shadow-[0_0_6px_var(--color-neon-green)]";
     }
   };
 
   return (
-    <header className="header">
-      <div className="header__logo">
-        <div className="header__logo-icon">
-          <span className="bracket">&lt;/&gt;</span>
+    <header className="bg-bg-secondary border-border-color header relative z-10 flex h-[48px] shrink-0 items-center justify-between border-b px-[16px]">
+      <div className="flex items-center gap-[10px]">
+        <div className="relative flex h-[28px] w-[28px] items-center justify-center">
+          <span className="text-neon-green font-mono text-[20px] font-[700] drop-shadow-[0_0_10px_var(--color-neon-green-glow-strong)]">
+            &lt;/&gt;
+          </span>
         </div>
         <div>
-          <div className="header__title">{APP_NAME}</div>
-          <div className="header__subtitle">sandbox v1.0</div>
+          <div className="font-display from-neon-green to-neon-cyan bg-gradient-to-br bg-clip-text text-[14px] font-[700] tracking-[3px] text-transparent uppercase">
+            {APP_NAME}
+          </div>
+          <div className="text-text-tertiary font-mono text-[10px] tracking-[1px]">
+            sandbox v1.0
+          </div>
         </div>
       </div>
 
-      <div className="header__actions">
-        <div className="header__status" role="status" aria-label="Execution status">
-          <span className={`header__status-dot ${getStatusDotClass()}`} />
+      <div className="flex items-center gap-[8px]">
+        <div
+          className="text-text-secondary bg-bg-tertiary border-border-color flex items-center gap-[6px] rounded-sm border px-[10px] py-[4px] font-mono text-[11px]"
+          role="status"
+          aria-label="Execution status"
+        >
+          <span
+            className={`header__status-dot h-[6px] w-[6px] animate-[pulse-glow_2s_ease-in-out_infinite] rounded-full ${getStatusDotClass()}`}
+          />
           {getStatusText()}
         </div>
       </div>
@@ -62,13 +75,14 @@ interface EditorToolbarProps {
 
 export function EditorToolbar({ onRun }: EditorToolbarProps) {
   const { activeFile, executionStatus, isBundlerReady } = useSandboxStore();
-  const isRunning = executionStatus === 'bundling' || executionStatus === 'running';
+  const isRunning =
+    executionStatus === "bundling" || executionStatus === "running";
 
   return (
-    <div className="editor-toolbar">
-      <div className="editor-toolbar__tabs">
+    <div className="bg-bg-secondary border-border-color flex h-[40px] shrink-0 items-center justify-between border-b px-[12px]">
+      <div className="flex items-center gap-[2px]">
         {activeFile && (
-          <button className="editor-tab editor-tab--active">
+          <button className="transition-fast text-text-primary bg-bg-primary border-neon-green flex items-center gap-[6px] rounded-t-sm border-b-[2px] px-[14px] py-[6px] font-mono text-[12px]">
             <Zap size={12} />
             {activeFile}
           </button>
@@ -76,15 +90,19 @@ export function EditorToolbar({ onRun }: EditorToolbarProps) {
       </div>
 
       <button
-        className={`editor-toolbar__run-btn ${isRunning ? 'editor-toolbar__run-btn--running' : ''}`}
+        className={`text-bg-primary from-neon-green to-neon-cyan group relative flex cursor-pointer items-center gap-[6px] overflow-hidden rounded-sm border-none bg-gradient-to-br px-[16px] py-[6px] font-mono text-[12px] font-[600] tracking-[1px] uppercase transition-normal hover:-translate-y-[1px] hover:shadow-[0_0_16px_var(--color-neon-green-glow-strong),0_0_32px_var(--color-neon-green-glow)] active:translate-y-0 ${isRunning ? "from-neon-yellow to-neon-orange editor-toolbar__run-btn--running animate-[glow-pulse_1.5s_ease-in-out_infinite]" : ""}`}
         onClick={onRun}
         disabled={!isBundlerReady || isRunning}
-        title={!isBundlerReady ? 'Bundler is initializing...' : 'Run code (Ctrl+Enter)'}
-        aria-label={isRunning ? 'Running...' : 'Run'}
+        title={
+          !isBundlerReady
+            ? "Bundler is initializing..."
+            : "Run code (Ctrl+Enter)"
+        }
+        aria-label={isRunning ? "Running..." : "Run"}
       >
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
           {isRunning ? <Square size={13} /> : <Play size={13} />}
-          {isRunning ? 'Running...' : 'Run'}
+          {isRunning ? "Running..." : "Run"}
         </span>
       </button>
     </div>

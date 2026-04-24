@@ -1,4 +1,4 @@
-import * as esbuild from 'esbuild-wasm';
+import * as esbuild from "esbuild-wasm";
 
 let isInitialized = false;
 
@@ -17,13 +17,16 @@ export async function initBundler(): Promise<void> {
 
   try {
     await esbuild.initialize({
-      wasmURL: 'https://unpkg.com/esbuild-wasm@latest/esbuild.wasm',
+      wasmURL: "https://unpkg.com/esbuild-wasm@latest/esbuild.wasm",
       worker: true,
     });
     isInitialized = true;
   } catch (err: unknown) {
     // esbuild throws if initialized more than once
-    if (err instanceof Error && err.message.includes('Cannot call "initialize"')) {
+    if (
+      err instanceof Error &&
+      err.message.includes('Cannot call "initialize"')
+    ) {
       isInitialized = true;
     } else {
       throw err;
@@ -40,69 +43,72 @@ function createSandboxPlugin(files: Record<string, string>): esbuild.Plugin {
   const fetchCache = new Map<string, esbuild.OnLoadResult>();
 
   return {
-    name: 'sandbox-plugin',
+    name: "sandbox-plugin",
     setup(build) {
       // --- RESOLVE PHASE ---
 
       // Handle the entry point (index.ts)
       build.onResolve({ filter: /^index\.ts$/ }, () => {
-        return { path: 'index.ts', namespace: 'vfs' };
+        return { path: "index.ts", namespace: "vfs" };
       });
 
       // Handle relative imports (./utils, ../helpers)
       build.onResolve({ filter: /^\.+\// }, (args) => {
         // Resolve relative to the importer
-        const importerDir = args.importer.includes('/')
-          ? args.importer.substring(0, args.importer.lastIndexOf('/') + 1)
-          : '';
+        const importerDir = args.importer.includes("/")
+          ? args.importer.substring(0, args.importer.lastIndexOf("/") + 1)
+          : "";
 
         let resolvedPath = importerDir + args.path;
 
         // Remove leading ./
-        resolvedPath = resolvedPath.replace(/^\.\//, '');
+        resolvedPath = resolvedPath.replace(/^\.\//, "");
 
         // Try to find the file with extensions
         if (files[resolvedPath]) {
-          return { path: resolvedPath, namespace: 'vfs' };
+          return { path: resolvedPath, namespace: "vfs" };
         }
         // Try adding common extensions
-        const extensions = ['.ts', '.tsx', '.js', '.jsx', '.json'];
+        const extensions = [".ts", ".tsx", ".js", ".jsx", ".json"];
         for (const ext of extensions) {
           if (files[resolvedPath + ext]) {
-            return { path: resolvedPath + ext, namespace: 'vfs' };
+            return { path: resolvedPath + ext, namespace: "vfs" };
           }
         }
 
         // Also try index files
         for (const ext of extensions) {
-          const indexPath = resolvedPath + '/index' + ext;
+          const indexPath = resolvedPath + "/index" + ext;
           if (files[indexPath]) {
-            return { path: indexPath, namespace: 'vfs' };
+            return { path: indexPath, namespace: "vfs" };
           }
         }
 
-        return { path: resolvedPath, namespace: 'vfs' };
+        return { path: resolvedPath, namespace: "vfs" };
       });
 
       // Handle NPM package imports (bare specifiers like 'lodash', 'react')
       build.onResolve({ filter: /.*/ }, (args) => {
-        if (args.namespace === 'unpkg') {
+        if (args.namespace === "unpkg") {
           // This is a nested import from within an unpkg package
-          const url = new URL(args.path, `https://unpkg.com${args.resolveDir}/`);
-          return { path: url.href, namespace: 'unpkg' };
+          const url = new URL(
+            args.path,
+            `https://unpkg.com${args.resolveDir}/`,
+          );
+          return { path: url.href, namespace: "unpkg" };
         }
 
         // Top-level npm import
         return {
           path: `https://unpkg.com/${args.path}`,
-          namespace: 'unpkg',
+          namespace: "unpkg",
         };
       });
 
       // --- LOAD PHASE ---
 
       // Load files from our Virtual File System
-      build.onLoad({ filter: /.*/, namespace: 'vfs' }, (args) => {
+      build.onLoad({ filter: /.*/, namespace: "vfs" }, (args) => {
         const content = files[args.path];
         if (content === undefined) {
           return {
@@ -110,19 +116,19 @@ function createSandboxPlugin(files: Record<string, string>): esbuild.Plugin {
           };
         }
 
-        const ext = args.path.split('.').pop();
-        let loader: esbuild.Loader = 'ts';
-        if (ext === 'js') loader = 'js';
-        if (ext === 'jsx') loader = 'jsx';
-        if (ext === 'tsx') loader = 'tsx';
-        if (ext === 'json') loader = 'json';
-        if (ext === 'css') loader = 'css';
+        const ext = args.path.split(".").pop();
+        let loader: esbuild.Loader = "ts";
+        if (ext === "js") loader = "js";
+        if (ext === "jsx") loader = "jsx";
+        if (ext === "tsx") loader = "tsx";
+        if (ext === "json") loader = "json";
+        if (ext === "css") loader = "css";
 
         return { contents: content, loader };
       });
 
       // Load files from unpkg (NPM packages)
-      build.onLoad({ filter: /.*/, namespace: 'unpkg' }, async (args) => {
+      build.onLoad({ filter: /.*/, namespace: "unpkg" }, async (args) => {
         // Check cache first
         const cached = fetchCache.get(args.path);
         if (cached) return cached;
@@ -131,7 +137,11 @@ function createSandboxPlugin(files: Record<string, string>): esbuild.Plugin {
           const response = await fetch(args.path);
           if (!response.ok) {
             return {
-              errors: [{ text: `Failed to fetch ${args.path}: ${response.statusText}` }],
+              errors: [
+                {
+                  text: `Failed to fetch ${args.path}: ${response.statusText}`,
+                },
+              ],
             };
           }
 
@@ -142,12 +152,12 @@ function createSandboxPlugin(files: Record<string, string>): esbuild.Plugin {
           const resolvedUrl = new URL(response.url);
           const resolveDir = resolvedUrl.pathname.substring(
             0,
-            resolvedUrl.pathname.lastIndexOf('/') + 1
+            resolvedUrl.pathname.lastIndexOf("/") + 1,
           );
 
           const result: esbuild.OnLoadResult = {
             contents,
-            loader: 'js',
+            loader: "js",
             resolveDir,
           };
 
@@ -155,7 +165,11 @@ function createSandboxPlugin(files: Record<string, string>): esbuild.Plugin {
           return result;
         } catch (err: unknown) {
           return {
-            errors: [{ text: `Network error fetching ${args.path}: ${getErrorMessage(err)}` }],
+            errors: [
+              {
+                text: `Network error fetching ${args.path}: ${getErrorMessage(err)}`,
+              },
+            ],
           };
         }
       });
@@ -172,32 +186,30 @@ export async function bundle(files: Record<string, string>): Promise<{
   error: string | null;
 }> {
   if (!isInitialized) {
-    return { code: '', error: 'Bundler not initialized' };
+    return { code: "", error: "Bundler not initialized" };
   }
 
   try {
     const result = await esbuild.build({
-      entryPoints: ['index.ts'],
+      entryPoints: ["index.ts"],
       bundle: true,
       write: false,
-      format: 'esm',
-      target: 'es2020',
+      format: "esm",
+      target: "es2020",
       plugins: [createSandboxPlugin(files)],
       define: {
-        'process.env.NODE_ENV': '"development"',
+        "process.env.NODE_ENV": '"development"',
       },
     });
 
     if (result.errors.length > 0) {
-      const errorMessages = result.errors
-        .map((e) => e.text)
-        .join('\n');
-      return { code: '', error: errorMessages };
+      const errorMessages = result.errors.map((e) => e.text).join("\n");
+      return { code: "", error: errorMessages };
     }
 
-    const code = result.outputFiles?.[0]?.text ?? '';
+    const code = result.outputFiles?.[0]?.text ?? "";
     return { code, error: null };
   } catch (err: unknown) {
-    return { code: '', error: getErrorMessage(err) };
+    return { code: "", error: getErrorMessage(err) };
   }
 }

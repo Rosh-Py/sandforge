@@ -1,15 +1,20 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 // --- Types ---
 
 export interface LogEntry {
   id: string;
-  type: 'log' | 'warn' | 'error' | 'info' | 'system';
+  type: "log" | "warn" | "error" | "info" | "system";
   message: string;
   timestamp: number;
 }
 
-export type ExecutionStatus = 'idle' | 'bundling' | 'running' | 'error' | 'success';
+export type ExecutionStatus =
+  | "idle"
+  | "bundling"
+  | "running"
+  | "error"
+  | "success";
 
 interface SandboxState {
   // Virtual File System
@@ -32,7 +37,7 @@ interface SandboxState {
   renameFile: (oldName: string, newName: string) => void;
 
   // Terminal operations
-  addLog: (entry: Omit<LogEntry, 'id' | 'timestamp'>) => void;
+  addLog: (entry: Omit<LogEntry, "id" | "timestamp">) => void;
   clearLogs: () => void;
 
   // Execution
@@ -49,7 +54,7 @@ const generateId = () => `log-${Date.now()}-${logIdCounter++}`;
 
 // Default starter files
 const DEFAULT_FILES: Record<string, string> = {
-  'index.ts': `// 🟢 Welcome to SandForge
+  "index.ts": `// 🟢 Welcome to SandForge
 // Write your TypeScript code here and hit RUN
 
 import { greet } from './utils';
@@ -61,7 +66,7 @@ console.log(message);
 // import _ from 'lodash';
 // console.log(_.chunk([1, 2, 3, 4, 5], 2));
 `,
-  'utils.ts': `export function greet(name: string): string {
+  "utils.ts": `export function greet(name: string): string {
   return \`⚡ Hello, \${name}! Welcome to the matrix.\`;
 }
 
@@ -74,14 +79,14 @@ export function add(a: number, b: number): number {
 export const useSandboxStore = create<SandboxState>((set, get) => ({
   // Initial state
   files: { ...DEFAULT_FILES },
-  activeFile: 'index.ts',
+  activeFile: "index.ts",
   logs: [],
-  executionStatus: 'idle',
+  executionStatus: "idle",
   isCreatingFile: false,
   isBundlerReady: false,
 
   // --- File operations ---
-  createFile: (name: string, content = '') => {
+  createFile: (name: string, content = "") => {
     const { files } = get();
     if (files[name]) return; // already exists
     set({
@@ -99,9 +104,7 @@ export const useSandboxStore = create<SandboxState>((set, get) => ({
     const remaining = Object.keys(updated);
     set({
       files: updated,
-      activeFile: name === activeFile
-        ? remaining[0] ?? ''
-        : activeFile,
+      activeFile: name === activeFile ? (remaining[0] ?? "") : activeFile,
     });
   },
 
