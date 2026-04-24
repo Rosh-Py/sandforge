@@ -97,7 +97,7 @@ export function CodeEditor() {
               "editor.background": "#0a0e17",
               "editor.foreground": "#e2e8f0",
               "editor.lineHighlightBackground": "#151b2b",
-              "editor.selectionBackground": "#1e274044",
+              "editor.selectionBackground": "#1e2740",
               "editorCursor.foreground": "#00ff9d",
               "editor.selectionHighlightBackground": "#00ff9d15",
               "editorLineNumber.foreground": "#3d4556",
