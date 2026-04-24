@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react';
 import Editor, { type OnMount } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
 import { useSandboxStore } from '../store/sandboxStore';
+import { EDITOR_THEME } from '../constants';
 
 // Map file extensions to Monaco language IDs
 export function getLanguage(filename: string): string {
@@ -72,10 +73,10 @@ export function CodeEditor() {
         value={currentContent}
         onChange={handleChange}
         onMount={handleMount}
-        theme="codex-dark"
+        theme={EDITOR_THEME}
         beforeMount={(monaco) => {
           // Define custom theme
-          monaco.editor.defineTheme('codex-dark', {
+          monaco.editor.defineTheme(EDITOR_THEME, {
             base: 'vs-dark',
             inherit: true,
             rules: [

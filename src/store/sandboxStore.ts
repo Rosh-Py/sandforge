@@ -49,7 +49,7 @@ const generateId = () => `log-${Date.now()}-${logIdCounter++}`;
 
 // Default starter files
 const DEFAULT_FILES: Record<string, string> = {
-  'index.ts': `// 🟢 Welcome to CODEX Sandbox
+  'index.ts': `// 🟢 Welcome to SandForge
 // Write your TypeScript code here and hit RUN
 
 import { greet } from './utils';

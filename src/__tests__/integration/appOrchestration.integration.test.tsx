@@ -24,6 +24,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { useSandboxStore } from '../../store/sandboxStore';
+import { APP_NAME_UPPER } from '../../constants';
 
 // ── Mocks ──────────────────────────────────────────────────────────────
 
@@ -89,7 +90,7 @@ describe('App — handleRun orchestration', () => {
     mockInitBundler.mockReturnValue(new Promise(() => {})); // never resolves
     render(<App />);
 
-    expect(screen.getByText('CODEX')).toBeInTheDocument();
+    expect(screen.getByText(APP_NAME_UPPER)).toBeInTheDocument();
     expect(screen.getByText('Initializing WASM Engine...')).toBeInTheDocument();
   });
 

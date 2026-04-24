@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useState } from 'react';
+import { APP_NAME_UPPER } from './constants';
 import { Header, EditorToolbar } from './components/Header';
 import { FileExplorer } from './components/FileExplorer';
 import { CodeEditor } from './components/CodeEditor';
@@ -10,7 +11,7 @@ import { executeInSandbox } from './services/executor';
 function LoadingScreen() {
   return (
     <div className="loading-screen" role="status" aria-label="Loading">
-      <div className="loading-screen__title">CODEX</div>
+      <div className="loading-screen__title">{APP_NAME_UPPER}</div>
       <div className="loading-screen__bar">
         <div className="loading-screen__bar-fill" />
       </div>

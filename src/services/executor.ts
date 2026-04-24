@@ -1,4 +1,5 @@
 import { useSandboxStore, type LogEntry } from '../store/sandboxStore';
+import { SANDBOX_SOURCE } from '../constants';
 
 type LogType = LogEntry['type'];
 
@@ -9,7 +10,7 @@ export function isLogType(value: unknown): value is LogType {
 }
 
 interface SandboxMessageBase {
-  source: 'codex-sandbox';
+  source: typeof SANDBOX_SOURCE;
 }
 
 interface SandboxLogMessage extends SandboxMessageBase {
@@ -30,7 +31,7 @@ type SandboxMessage = SandboxLogMessage | SandboxDoneMessage | SandboxClearMessa
 export function isSandboxMessage(data: unknown): data is SandboxMessage {
   if (typeof data !== 'object' || data === null) return false;
   const record = data as Record<string, unknown>;
-  return record.source === 'codex-sandbox' && typeof record.type === 'string';
+  return record.source === SANDBOX_SOURCE && typeof record.type === 'string';
 }
 
 /**
@@ -62,7 +63,7 @@ function createSandboxHTML(code: string): string {
         .join(' ');
       
       window.parent.postMessage({
-        source: 'codex-sandbox',
+        source: '${SANDBOX_SOURCE}',
         type: type,
         message: message,
       }, '*');
@@ -75,7 +76,7 @@ function createSandboxHTML(code: string): string {
     console.table = (...args) => { sendToParent('log', args); };
     console.dir = (...args) => { sendToParent('log', args); };
     console.clear = () => {
-      window.parent.postMessage({ source: 'codex-sandbox', type: 'clear' }, '*');
+      window.parent.postMessage({ source: '${SANDBOX_SOURCE}', type: 'clear' }, '*');
     };
     
     // Catch uncaught errors
@@ -90,21 +91,21 @@ function createSandboxHTML(code: string): string {
     };
     
     // Signal that we're starting
-    window.parent.postMessage({ source: 'codex-sandbox', type: 'system', message: '⚡ Execution started...' }, '*');
+    window.parent.postMessage({ source: '${SANDBOX_SOURCE}', type: 'system', message: '⚡ Execution started...' }, '*');
   <\/script>
   <script type="module">
     try {
       ${code}
       // Signal completion after sync code finishes
       // (async operations will still run and post messages)
-      window.parent.postMessage({ source: 'codex-sandbox', type: 'done' }, '*');
+      window.parent.postMessage({ source: '${SANDBOX_SOURCE}', type: 'done' }, '*');
     } catch (err) {
       window.parent.postMessage({
-        source: 'codex-sandbox',
+        source: '${SANDBOX_SOURCE}',
         type: 'error',
         message: err.stack || err.message || String(err),
       }, '*');
-      window.parent.postMessage({ source: 'codex-sandbox', type: 'done' }, '*');
+      window.parent.postMessage({ source: '${SANDBOX_SOURCE}', type: 'done' }, '*');
     }
   <\/script>
 </body>

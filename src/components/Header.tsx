@@ -1,5 +1,6 @@
 import { Play, Square, Zap } from 'lucide-react';
 import { useSandboxStore } from '../store/sandboxStore';
+import { APP_NAME } from '../constants';
 
 export function Header() {
   const { executionStatus, isBundlerReady } = useSandboxStore();
@@ -40,7 +41,7 @@ export function Header() {
           <span className="bracket">&lt;/&gt;</span>
         </div>
         <div>
-          <div className="header__title">Codex</div>
+          <div className="header__title">{APP_NAME}</div>
           <div className="header__subtitle">sandbox v1.0</div>
         </div>
       </div>

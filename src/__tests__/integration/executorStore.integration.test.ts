@@ -19,6 +19,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useSandboxStore } from '../../store/sandboxStore';
 import { executeInSandbox, destroySandbox } from '../../services/executor';
+import { SANDBOX_SOURCE } from '../../constants';
 
 function resetStore() {
   useSandboxStore.setState(useSandboxStore.getInitialState());
@@ -50,7 +51,7 @@ describe('Executor ↔ Store full integration', () => {
 
     window.dispatchEvent(
       new MessageEvent('message', {
-        data: { source: 'codex-sandbox', type: 'log', message: 'hello from sandbox' },
+        data: { source: SANDBOX_SOURCE, type: 'log', message: 'hello from sandbox' },
       })
     );
 
@@ -76,7 +77,7 @@ describe('Executor ↔ Store full integration', () => {
     messages.forEach((m) => {
       window.dispatchEvent(
         new MessageEvent('message', {
-          data: { source: 'codex-sandbox', ...m },
+          data: { source: SANDBOX_SOURCE, ...m },
         })
       );
     });
@@ -92,7 +93,7 @@ describe('Executor ↔ Store full integration', () => {
 
     window.dispatchEvent(
       new MessageEvent('message', {
-        data: { source: 'codex-sandbox', type: 'done' },
+        data: { source: SANDBOX_SOURCE, type: 'done' },
       })
     );
 
@@ -108,7 +109,7 @@ describe('Executor ↔ Store full integration', () => {
 
     window.dispatchEvent(
       new MessageEvent('message', {
-        data: { source: 'codex-sandbox', type: 'clear' },
+        data: { source: SANDBOX_SOURCE, type: 'clear' },
       })
     );
 
@@ -133,7 +134,7 @@ describe('Executor ↔ Store full integration', () => {
     for (let i = 0; i < 50; i++) {
       window.dispatchEvent(
         new MessageEvent('message', {
-          data: { source: 'codex-sandbox', type: 'log', message: `msg-${i}` },
+          data: { source: SANDBOX_SOURCE, type: 'log', message: `msg-${i}` },
         })
       );
     }
@@ -150,7 +151,7 @@ describe('Executor ↔ Store full integration', () => {
     executeInSandbox('first run');
     window.dispatchEvent(
       new MessageEvent('message', {
-        data: { source: 'codex-sandbox', type: 'log', message: 'from-first' },
+        data: { source: SANDBOX_SOURCE, type: 'log', message: 'from-first' },
       })
     );
     expect(state().logs).toHaveLength(1);
@@ -168,7 +169,7 @@ describe('Executor ↔ Store full integration', () => {
     // This message should be silently dropped since the handler was removed
     window.dispatchEvent(
       new MessageEvent('message', {
-        data: { source: 'codex-sandbox', type: 'log', message: 'ghost message' },
+        data: { source: SANDBOX_SOURCE, type: 'log', message: 'ghost message' },
       })
     );
 
@@ -183,7 +184,7 @@ describe('Executor ↔ Store full integration', () => {
     vi.advanceTimersByTime(5000);
     window.dispatchEvent(
       new MessageEvent('message', {
-        data: { source: 'codex-sandbox', type: 'done' },
+        data: { source: SANDBOX_SOURCE, type: 'done' },
       })
     );
 
@@ -202,7 +203,7 @@ describe('Executor ↔ Store full integration', () => {
 
     window.dispatchEvent(
       new MessageEvent('message', {
-        data: { source: 'codex-sandbox', type: 'debug', message: 'debug msg' },
+        data: { source: SANDBOX_SOURCE, type: 'debug', message: 'debug msg' },
       })
     );
 

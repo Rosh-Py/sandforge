@@ -14,6 +14,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 // a stale copy of logic). Now we test the actual exported functions.
 
 import { isLogType, isSandboxMessage } from '../../services/executor';
+import { SANDBOX_SOURCE } from '../../constants';
 
 // ─── Suite: Type Guards ─────────────────────────────────────────────────
 
@@ -44,19 +45,19 @@ describe('executor — type guards', () => {
   describe('isSandboxMessage', () => {
     it('returns true for a valid log message', () => {
       expect(
-        isSandboxMessage({ source: 'codex-sandbox', type: 'log', message: 'hi' })
+        isSandboxMessage({ source: SANDBOX_SOURCE, type: 'log', message: 'hi' })
       ).toBe(true);
     });
 
     it('returns true for a valid done message (no message field)', () => {
       expect(
-        isSandboxMessage({ source: 'codex-sandbox', type: 'done' })
+        isSandboxMessage({ source: SANDBOX_SOURCE, type: 'done' })
       ).toBe(true);
     });
 
     it('returns true for a valid clear message', () => {
       expect(
-        isSandboxMessage({ source: 'codex-sandbox', type: 'clear' })
+        isSandboxMessage({ source: SANDBOX_SOURCE, type: 'clear' })
       ).toBe(true);
     });
 
@@ -71,12 +72,12 @@ describe('executor — type guards', () => {
     });
 
     it('returns false when type is missing', () => {
-      expect(isSandboxMessage({ source: 'codex-sandbox' })).toBe(false);
+      expect(isSandboxMessage({ source: SANDBOX_SOURCE })).toBe(false);
     });
 
     it('returns false when type is non-string', () => {
       expect(
-        isSandboxMessage({ source: 'codex-sandbox', type: 123 })
+        isSandboxMessage({ source: SANDBOX_SOURCE, type: 123 })
       ).toBe(false);
     });
 
@@ -190,7 +191,7 @@ describe('executor — sandbox lifecycle', () => {
     executeInSandbox('console.log("test")');
 
     const doneEvent = new MessageEvent('message', {
-      data: { source: 'codex-sandbox', type: 'done' },
+      data: { source: SANDBOX_SOURCE, type: 'done' },
     });
     window.dispatchEvent(doneEvent);
 
@@ -208,7 +209,7 @@ describe('executor — sandbox lifecycle', () => {
     executeInSandbox('console.log("test")');
 
     const clearEvent = new MessageEvent('message', {
-      data: { source: 'codex-sandbox', type: 'clear' },
+      data: { source: SANDBOX_SOURCE, type: 'clear' },
     });
     window.dispatchEvent(clearEvent);
 
@@ -219,7 +220,7 @@ describe('executor — sandbox lifecycle', () => {
     executeInSandbox('console.log("test")');
 
     const logEvent = new MessageEvent('message', {
-      data: { source: 'codex-sandbox', type: 'warn', message: 'be careful' },
+      data: { source: SANDBOX_SOURCE, type: 'warn', message: 'be careful' },
     });
     window.dispatchEvent(logEvent);
 
@@ -233,7 +234,7 @@ describe('executor — sandbox lifecycle', () => {
     executeInSandbox('console.log("test")');
 
     const unknownEvent = new MessageEvent('message', {
-      data: { source: 'codex-sandbox', type: 'trace', message: 'traced' },
+      data: { source: SANDBOX_SOURCE, type: 'trace', message: 'traced' },
     });
     window.dispatchEvent(unknownEvent);
 
@@ -275,7 +276,7 @@ describe('executor — sandbox lifecycle', () => {
 
     // Send "done" before timeout
     const doneEvent = new MessageEvent('message', {
-      data: { source: 'codex-sandbox', type: 'done' },
+      data: { source: SANDBOX_SOURCE, type: 'done' },
     });
     window.dispatchEvent(doneEvent);
 
