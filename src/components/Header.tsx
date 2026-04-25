@@ -24,13 +24,13 @@ export function Header() {
 
   const getStatusDotClass = () => {
     if (!isBundlerReady)
-      return "header__status-dot--running bg-neon-yellow shadow-[0_0_6px_var(--color-neon-yellow)]";
+      return "bg-neon-yellow shadow-[0_0_6px_var(--color-neon-yellow)]";
     switch (executionStatus) {
       case "error":
-        return "header__status-dot--error bg-neon-pink shadow-[0_0_6px_var(--color-neon-pink)]";
+        return "bg-neon-pink shadow-[0_0_6px_var(--color-neon-pink)]";
       case "bundling":
       case "running":
-        return "header__status-dot--running bg-neon-yellow shadow-[0_0_6px_var(--color-neon-yellow)]";
+        return "bg-neon-yellow shadow-[0_0_6px_var(--color-neon-yellow)]";
       default:
         return "bg-neon-green shadow-[0_0_6px_var(--color-neon-green)]";
     }
@@ -58,7 +58,9 @@ export function Header() {
           aria-label="Execution status"
         >
           <span
-            className={`header__status-dot h-[6px] w-[6px] animate-[pulse-glow_2s_ease-in-out_infinite] rounded-full ${getStatusDotClass()}`}
+            data-testid="status-dot"
+            data-execution-status={!isBundlerReady ? "initializing" : executionStatus}
+            className={`h-[6px] w-[6px] animate-[pulse-glow_2s_ease-in-out_infinite] rounded-full ${getStatusDotClass()}`}
           />
           {getStatusText()}
         </div>
@@ -82,7 +84,7 @@ export function EditorToolbar({ onRun }: EditorToolbarProps) {
     <div className="bg-bg-secondary border-border-color flex h-[40px] shrink-0 items-center justify-between border-b px-[12px]">
       <div className="flex items-center gap-[2px]">
         {activeFile && (
-          <button className="transition-fast text-text-primary bg-bg-primary border-neon-green flex items-center gap-[6px] rounded-t-sm border-b-[2px] px-[14px] py-[6px] font-mono text-[12px]">
+          <button className="text-text-primary bg-bg-primary border-neon-green flex items-center gap-[6px] rounded-t-sm border-b-[2px] px-[14px] py-[6px] font-mono text-[12px]">
             <Zap size={12} />
             {activeFile}
           </button>
@@ -90,7 +92,9 @@ export function EditorToolbar({ onRun }: EditorToolbarProps) {
       </div>
 
       <button
-        className={`text-bg-primary from-neon-green to-neon-cyan group relative flex cursor-pointer items-center gap-[6px] overflow-hidden rounded-sm border-none bg-gradient-to-br px-[16px] py-[6px] font-mono text-[12px] font-[600] tracking-[1px] uppercase transition-normal hover:-translate-y-[1px] hover:shadow-[0_0_16px_var(--color-neon-green-glow-strong),0_0_32px_var(--color-neon-green-glow)] active:translate-y-0 ${isRunning ? "from-neon-yellow to-neon-orange editor-toolbar__run-btn--running animate-[glow-pulse_1.5s_ease-in-out_infinite]" : ""}`}
+        data-testid="run-button"
+        data-is-running={isRunning}
+        className={`text-bg-primary from-neon-green to-neon-cyan group relative flex cursor-pointer items-center gap-[6px] overflow-hidden rounded-sm border-none bg-gradient-to-br px-[16px] py-[6px] font-mono text-[12px] font-[600] tracking-[1px] uppercase hover:-translate-y-[1px] hover:shadow-[0_0_16px_var(--color-neon-green-glow-strong),0_0_32px_var(--color-neon-green-glow)] active:translate-y-0 ${isRunning ? "from-neon-yellow to-neon-orange animate-[glow-pulse_1.5s_ease-in-out_infinite]" : ""}`}
         onClick={onRun}
         disabled={!isBundlerReady || isRunning}
         title={

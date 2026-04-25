@@ -97,7 +97,7 @@ export function FileExplorer() {
         </span>
         <div className="flex gap-[4px]">
           <button
-            className="text-text-tertiary transition-fast hover:bg-bg-hover hover:text-neon-green flex h-[26px] w-[26px] cursor-pointer items-center justify-center rounded-sm border-none bg-transparent"
+            className="text-text-tertiary hover:bg-bg-hover hover:text-neon-green flex h-[26px] w-[26px] cursor-pointer items-center justify-center rounded-sm border-none bg-transparent"
             onClick={handleCreateStart}
             title="New File"
           >
@@ -116,7 +116,7 @@ export function FileExplorer() {
             key={name}
             role="option"
             aria-selected={name === activeFile}
-            className={`transition-fast hover:bg-bg-hover group relative flex animate-[fade-in_200ms_ease_forwards] cursor-pointer items-center gap-[8px] border-l-[2px] px-[14px] py-[6px] ${name === activeFile ? "bg-bg-tertiary border-neon-green" : "border-transparent"}`}
+            className={`hover:bg-bg-hover group relative flex animate-[fade-in_200ms_ease_forwards] cursor-pointer items-center gap-[8px] border-l-[2px] px-[14px] py-[6px] ${name === activeFile ? "bg-bg-tertiary border-neon-green" : "border-transparent"}`}
             onClick={() => setActiveFile(name)}
           >
             {getFileIcon(name)}
@@ -127,7 +127,7 @@ export function FileExplorer() {
             </span>
             {fileNames.length > 1 && (
               <button
-                className="text-text-muted transition-fast hover:text-neon-pink hover:bg-neon-pink-glow flex h-[20px] w-[20px] cursor-pointer items-center justify-center rounded-sm border-none bg-transparent opacity-0 group-hover:opacity-100"
+                className="text-text-muted hover:text-neon-pink hover:bg-neon-pink-glow flex h-[20px] w-[20px] cursor-pointer items-center justify-center rounded-sm border-none bg-transparent opacity-0 group-hover:opacity-100"
                 onClick={(e) => handleDelete(e, name)}
                 title="Delete file"
                 aria-label={`Delete ${name}`}

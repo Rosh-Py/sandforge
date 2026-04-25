@@ -61,8 +61,8 @@ describe("Header ↔ Store integration", () => {
 
     render(<Header />);
 
-    const dot = document.querySelector(".header__status-dot");
-    expect(dot).toHaveClass("header__status-dot--running");
+    const dot = screen.getByTestId("status-dot");
+    expect(dot).toHaveAttribute("data-execution-status", "bundling");
   });
 
   it("uses error dot class during error state", () => {
@@ -71,15 +71,15 @@ describe("Header ↔ Store integration", () => {
 
     render(<Header />);
 
-    const dot = document.querySelector(".header__status-dot");
-    expect(dot).toHaveClass("header__status-dot--error");
+    const dot = screen.getByTestId("status-dot");
+    expect(dot).toHaveAttribute("data-execution-status", "error");
   });
 
   it("uses running dot class when bundler is not ready (initializing)", () => {
     render(<Header />);
 
-    const dot = document.querySelector(".header__status-dot");
-    expect(dot).toHaveClass("header__status-dot--running");
+    const dot = screen.getByTestId("status-dot");
+    expect(dot).toHaveAttribute("data-execution-status", "initializing");
   });
 
   it("uses no special dot class in idle/success states", () => {
@@ -88,9 +88,10 @@ describe("Header ↔ Store integration", () => {
 
     render(<Header />);
 
-    const dot = document.querySelector(".header__status-dot");
-    expect(dot).not.toHaveClass("header__status-dot--running");
-    expect(dot).not.toHaveClass("header__status-dot--error");
+    const dot = screen.getByTestId("status-dot");
+    expect(dot).toHaveAttribute("data-execution-status", "idle");
+    expect(dot).not.toHaveAttribute("data-execution-status", "bundling");
+    expect(dot).not.toHaveAttribute("data-execution-status", "error");
   });
 });
 
@@ -223,8 +224,8 @@ describe("EditorToolbar ↔ Store integration", () => {
 
     render(<EditorToolbar onRun={mockOnRun} />);
 
-    const runBtn = screen.getByText("Running...").closest("button")!;
-    expect(runBtn).toHaveClass("editor-toolbar__run-btn--running");
+    const runBtn = screen.getByTestId("run-button");
+    expect(runBtn).toHaveAttribute("data-is-running", "true");
   });
 
   it("does not apply running CSS class when idle", () => {
@@ -233,7 +234,7 @@ describe("EditorToolbar ↔ Store integration", () => {
 
     render(<EditorToolbar onRun={mockOnRun} />);
 
-    const runBtn = screen.getByText("Run").closest("button")!;
-    expect(runBtn).not.toHaveClass("editor-toolbar__run-btn--running");
+    const runBtn = screen.getByTestId("run-button");
+    expect(runBtn).toHaveAttribute("data-is-running", "false");
   });
 });

@@ -69,22 +69,22 @@ describe("Terminal ↔ Store integration", () => {
 
     render(<Terminal />);
 
-    const logLine = screen.getByText("log-msg").closest(".terminal__line");
-    expect(logLine).toHaveClass("terminal__line--log");
+    const logLine = screen.getByText("log-msg").closest('[data-testid="terminal-line"]');
+    expect(logLine).toHaveAttribute("data-log-type", "log");
 
-    const warnLine = screen.getByText("warn-msg").closest(".terminal__line");
-    expect(warnLine).toHaveClass("terminal__line--warn");
+    const warnLine = screen.getByText("warn-msg").closest('[data-testid="terminal-line"]');
+    expect(warnLine).toHaveAttribute("data-log-type", "warn");
 
-    const errorLine = screen.getByText("error-msg").closest(".terminal__line");
-    expect(errorLine).toHaveClass("terminal__line--error");
+    const errorLine = screen.getByText("error-msg").closest('[data-testid="terminal-line"]');
+    expect(errorLine).toHaveAttribute("data-log-type", "error");
 
-    const infoLine = screen.getByText("info-msg").closest(".terminal__line");
-    expect(infoLine).toHaveClass("terminal__line--info");
+    const infoLine = screen.getByText("info-msg").closest('[data-testid="terminal-line"]');
+    expect(infoLine).toHaveAttribute("data-log-type", "info");
 
     const systemLine = screen
       .getByText("system-msg")
-      .closest(".terminal__line");
-    expect(systemLine).toHaveClass("terminal__line--system");
+      .closest('[data-testid="terminal-line"]');
+    expect(systemLine).toHaveAttribute("data-log-type", "system");
   });
 
   it("renders correct prefix icons for each log type", () => {
@@ -96,7 +96,7 @@ describe("Terminal ↔ Store integration", () => {
 
     render(<Terminal />);
 
-    const prefixes = document.querySelectorAll(".terminal__prefix");
+    const prefixes = screen.getAllByTestId("terminal-prefix");
     const prefixTexts = Array.from(prefixes).map((el) => el.textContent);
 
     expect(prefixTexts).toEqual(["›", "⚠", "✖", "ℹ", "⚡"]);
@@ -109,7 +109,7 @@ describe("Terminal ↔ Store integration", () => {
 
     render(<Terminal />);
 
-    const messages = document.querySelectorAll(".terminal__message");
+    const messages = screen.getAllByTestId("terminal-message");
     const texts = Array.from(messages).map((el) => el.textContent);
     expect(texts).toEqual(["first", "second", "third"]);
   });
@@ -163,7 +163,7 @@ describe("Terminal ↔ Store integration", () => {
 
     render(<Terminal />);
 
-    const messages = document.querySelectorAll(".terminal__message");
+    const messages = screen.getAllByTestId("terminal-message");
     expect(messages).toHaveLength(100);
     expect(screen.getByText("log-0")).toBeInTheDocument();
     expect(screen.getByText("log-99")).toBeInTheDocument();

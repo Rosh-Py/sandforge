@@ -57,8 +57,8 @@ async function waitForDone(page: Page) {
 /** Get all terminal log messages from the log region. */
 async function getTerminalMessages(page: Page): Promise<string[]> {
   const log = page.getByRole("log", { name: "Terminal output" });
-  // Each message is in a span — get text content of the log lines
-  return log.locator('[class*="terminal__line"]').allTextContents();
+  // Each message is in a line — get text content of the log lines
+  return log.locator('[data-testid="terminal-line"]').allTextContents();
 }
 
 // ─────────────────────────────────────────────────────────────────────────

@@ -40,7 +40,7 @@ export function Terminal() {
         </div>
         {logs.length > 0 && (
           <button
-            className="text-text-tertiary border-border-color transition-fast hover:text-neon-pink hover:border-neon-pink hover:bg-neon-pink-glow flex cursor-pointer items-center rounded-sm border bg-transparent px-[10px] py-[3px] font-mono text-[10px] tracking-[1px] uppercase"
+            className="text-text-tertiary border-border-color hover:text-neon-pink hover:border-neon-pink hover:bg-neon-pink-glow flex cursor-pointer items-center rounded-sm border bg-transparent px-[10px] py-[3px] font-mono text-[10px] tracking-[1px] uppercase"
             onClick={clearLogs}
             aria-label="Clear terminal"
           >
@@ -65,15 +65,19 @@ export function Terminal() {
           logs.map((log) => (
             <div
               key={log.id}
-              className={`terminal__line terminal__line--${log.type} mt-[2px] flex animate-[fade-in_100ms_ease] gap-[8px] first:mt-0 ${log.type === "system" ? "italic" : ""}`}
+              data-testid="terminal-line"
+              data-log-type={log.type}
+              className={`mt-[2px] flex animate-[fade-in_100ms_ease] gap-[8px] first:mt-0 ${log.type === "system" ? "italic" : ""}`}
             >
               <span
-                className={`terminal__prefix shrink-0 select-none ${log.type === "system" ? "text-neon-purple-dim" : "text-text-muted"}`}
+                data-testid="terminal-prefix"
+                className={`shrink-0 select-none ${log.type === "system" ? "text-neon-purple-dim" : "text-text-muted"}`}
               >
                 {getPrefix(log.type)}
               </span>
               <span
-                className={`terminal__message break-all whitespace-pre-wrap ${log.type === "warn" ? "text-terminal-warn" : log.type === "error" ? "text-terminal-error" : log.type === "info" ? "text-terminal-info" : log.type === "system" ? "text-neon-purple" : "text-terminal-log"}`}
+                data-testid="terminal-message"
+                className={`break-all whitespace-pre-wrap ${log.type === "warn" ? "text-terminal-warn" : log.type === "error" ? "text-terminal-error" : log.type === "info" ? "text-terminal-info" : log.type === "system" ? "text-neon-purple" : "text-terminal-log"}`}
               >
                 {log.message}
               </span>
