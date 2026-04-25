@@ -7,7 +7,9 @@ import { getLanguage } from "../utils/editorUtils";
 
 
 export function CodeEditor() {
-  const { files, activeFile, updateFileContent } = useSandboxStore();
+  const files = useSandboxStore((s) => s.files);
+  const activeFile = useSandboxStore((s) => s.activeFile);
+  const { updateFileContent } = useSandboxStore((s) => s.actions);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
   const currentContent = files[activeFile] ?? "";

@@ -130,12 +130,12 @@ let messageHandler: ((e: MessageEvent) => void) | null = null;
  * Execute bundled code in a sandboxed iframe.
  */
 export function executeInSandbox(code: string): void {
-  const store = useSandboxStore.getState();
+  const { actions } = useSandboxStore.getState();
 
   // Clean up previous sandbox
   destroySandbox();
 
-  store.setExecutionStatus("running");
+  actions.setExecutionStatus("running");
 
   // Create a new iframe
   const iframe = document.createElement("iframe");
@@ -146,12 +146,12 @@ export function executeInSandbox(code: string): void {
 
   // Listen for messages from the sandbox
   const timeoutId = setTimeout(() => {
-    store.addLog({
+    actions.addLog({
       type: "error",
       message:
         "⏱ Execution timeout (10s). Possible infinite loop detected. Sandbox terminated.",
     });
-    store.setExecutionStatus("error");
+    actions.setExecutionStatus("error");
     destroySandbox();
   }, 10000);
 
@@ -161,18 +161,18 @@ export function executeInSandbox(code: string): void {
 
     if (data.type === "done") {
       clearTimeout(timeoutId);
-      store.setExecutionStatus("success");
+      actions.setExecutionStatus("success");
       // Keep iframe alive for a bit to catch async logs
       setTimeout(() => destroySandbox(), 3000);
       return;
     }
 
     if (data.type === "clear") {
-      store.clearLogs();
+      actions.clearLogs();
       return;
     }
 
-    store.addLog({
+    actions.addLog({
       type: isLogType(data.type) ? data.type : "log",
       message: data.message,
     });

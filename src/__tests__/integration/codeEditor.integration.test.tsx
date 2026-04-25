@@ -70,7 +70,7 @@ describe("CodeEditor ↔ Store integration", () => {
     expect(editor.value).toBe(state().files["index.ts"]);
 
     // Switch to utils.ts
-    state().setActiveFile("utils.ts");
+    state().actions.setActiveFile("utils.ts");
     unmount();
     render(<CodeEditor />);
 
@@ -94,8 +94,8 @@ describe("CodeEditor ↔ Store integration", () => {
   });
 
   it("handles empty content (newly created file)", () => {
-    state().createFile("empty.ts");
-    state().setActiveFile("empty.ts");
+    state().actions.createFile("empty.ts");
+    state().actions.setActiveFile("empty.ts");
 
     render(<CodeEditor />);
 

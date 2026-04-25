@@ -3,7 +3,8 @@ import { useSandboxStore } from "../store/sandboxStore";
 import { APP_NAME } from "../constants";
 
 export function Header() {
-  const { executionStatus, isBundlerReady } = useSandboxStore();
+  const executionStatus = useSandboxStore((s) => s.executionStatus);
+  const isBundlerReady = useSandboxStore((s) => s.isBundlerReady);
 
   const getStatusText = () => {
     if (!isBundlerReady) return "Initializing WASM...";
@@ -71,7 +72,9 @@ interface EditorToolbarProps {
 }
 
 export function EditorToolbar({ onRun }: EditorToolbarProps) {
-  const { activeFile, executionStatus, isBundlerReady } = useSandboxStore();
+  const activeFile = useSandboxStore((s) => s.activeFile);
+  const executionStatus = useSandboxStore((s) => s.executionStatus);
+  const isBundlerReady = useSandboxStore((s) => s.isBundlerReady);
   const isRunning =
     executionStatus === "bundling" || executionStatus === "running";
 

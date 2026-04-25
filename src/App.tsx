@@ -29,14 +29,10 @@ function LoadingScreen() {
 }
 
 export default function App() {
-  const {
-    files,
-    isBundlerReady,
-    setBundlerReady,
-    setExecutionStatus,
-    addLog,
-    clearLogs,
-  } = useSandboxStore();
+  const files = useSandboxStore((s) => s.files);
+  const isBundlerReady = useSandboxStore((s) => s.isBundlerReady);
+  const { setBundlerReady, setExecutionStatus, addLog, clearLogs } =
+    useSandboxStore((s) => s.actions);
 
   const [isLoading, setIsLoading] = useState(true);
 

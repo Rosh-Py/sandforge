@@ -3,7 +3,8 @@ import { Terminal as TerminalIcon, Trash2 } from "lucide-react";
 import { useSandboxStore, type LogEntry } from "../store/sandboxStore";
 
 export function Terminal() {
-  const { logs, clearLogs } = useSandboxStore();
+  const logs = useSandboxStore((s) => s.logs);
+  const { clearLogs } = useSandboxStore((s) => s.actions);
   const outputRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom on new logs

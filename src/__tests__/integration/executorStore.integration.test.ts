@@ -112,7 +112,7 @@ describe("Executor ↔ Store full integration", () => {
 
   it('"clear" message empties the log array in the store', () => {
     // Pre-populate logs
-    state().addLog({ type: "log", message: "existing log" });
+    state().actions.addLog({ type: "log", message: "existing log" });
     expect(state().logs).toHaveLength(1);
 
     executeInSandbox("void 0");

@@ -46,15 +46,11 @@ function getFileIcon(filename: string) {
 }
 
 export function FileExplorer() {
-  const {
-    files,
-    activeFile,
-    isCreatingFile,
-    setActiveFile,
-    createFile,
-    deleteFile,
-    setIsCreatingFile,
-  } = useSandboxStore();
+  const files = useSandboxStore((s) => s.files);
+  const activeFile = useSandboxStore((s) => s.activeFile);
+  const isCreatingFile = useSandboxStore((s) => s.isCreatingFile);
+  const { setActiveFile, createFile, deleteFile, setIsCreatingFile } =
+    useSandboxStore((s) => s.actions);
 
   const [newFileName, setNewFileName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);

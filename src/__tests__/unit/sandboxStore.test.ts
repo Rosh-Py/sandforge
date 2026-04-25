@@ -45,8 +45,8 @@ describe("sandboxStore", () => {
   // ── File operations ─────────────────────────────────────────────────
   describe("createFile", () => {
     it("creates a new file, activates it, and resets isCreatingFile", () => {
-      state().setIsCreatingFile(true);
-      state().createFile("hello.ts", 'console.log("hi")');
+      state().actions.setIsCreatingFile(true);
+      state().actions.createFile("hello.ts", 'console.log("hi")');
       const { files, activeFile, isCreatingFile } = state();
       expect(files["hello.ts"]).toBe('console.log("hi")');
       expect(activeFile).toBe("hello.ts");
@@ -54,39 +54,39 @@ describe("sandboxStore", () => {
     });
 
     it("defaults content to empty string when omitted", () => {
-      state().createFile("empty.ts");
+      state().actions.createFile("empty.ts");
       expect(state().files["empty.ts"]).toBe("");
     });
 
     it("is a no-op for duplicate file names (preserves existing content)", () => {
       const originalContent = state().files["index.ts"];
-      state().createFile("index.ts", "SHOULD_NOT_OVERWRITE");
+      state().actions.createFile("index.ts", "SHOULD_NOT_OVERWRITE");
       expect(state().files["index.ts"]).toBe(originalContent);
     });
   });
 
   describe("deleteFile", () => {
     it("removes the file from the store", () => {
-      state().deleteFile("utils.ts");
+      state().actions.deleteFile("utils.ts");
       expect(state().files["utils.ts"]).toBeUndefined();
     });
 
     it("falls back activeFile to the first remaining file when deleting active", () => {
       // active is index.ts
-      state().deleteFile("index.ts");
+      state().actions.deleteFile("index.ts");
       const { activeFile, files } = state();
       expect(activeFile).not.toBe("index.ts");
       expect(Object.keys(files)).toContain(activeFile);
     });
 
     it("preserves activeFile when deleting a non-active file", () => {
-      state().deleteFile("utils.ts");
+      state().actions.deleteFile("utils.ts");
       expect(state().activeFile).toBe("index.ts");
     });
 
     it("sets activeFile to empty string when all files are deleted", () => {
-      state().deleteFile("index.ts");
-      state().deleteFile("utils.ts");
+      state().actions.deleteFile("index.ts");
+      state().actions.deleteFile("utils.ts");
       expect(Object.keys(state().files)).toHaveLength(0);
       expect(state().activeFile).toBe("");
     });
@@ -95,13 +95,13 @@ describe("sandboxStore", () => {
   describe("updateFileContent", () => {
     it("updates existing file content without affecting other files", () => {
       const utilsBefore = state().files["utils.ts"];
-      state().updateFileContent("index.ts", "const x = 42;");
+      state().actions.updateFileContent("index.ts", "const x = 42;");
       expect(state().files["index.ts"]).toBe("const x = 42;");
       expect(state().files["utils.ts"]).toBe(utilsBefore);
     });
 
     it("upserts — creates a new file entry if name does not exist", () => {
-      state().updateFileContent("phantom.ts", "code");
+      state().actions.updateFileContent("phantom.ts", "code");
       expect(state().files["phantom.ts"]).toBe("code");
     });
   });
@@ -109,26 +109,26 @@ describe("sandboxStore", () => {
   describe("renameFile", () => {
     it("renames a file: old key gone, new key has same content", () => {
       const original = state().files["utils.ts"];
-      state().renameFile("utils.ts", "helpers.ts");
+      state().actions.renameFile("utils.ts", "helpers.ts");
       expect(state().files["helpers.ts"]).toBe(original);
       expect(state().files["utils.ts"]).toBeUndefined();
     });
 
     it("updates activeFile when the active file is renamed", () => {
-      state().setActiveFile("utils.ts");
-      state().renameFile("utils.ts", "helpers.ts");
+      state().actions.setActiveFile("utils.ts");
+      state().actions.renameFile("utils.ts", "helpers.ts");
       expect(state().activeFile).toBe("helpers.ts");
     });
 
     it("leaves activeFile unchanged when renaming a non-active file", () => {
-      state().renameFile("utils.ts", "helpers.ts");
+      state().actions.renameFile("utils.ts", "helpers.ts");
       expect(state().activeFile).toBe("index.ts");
     });
 
     it("is a no-op when the target name already exists (prevents collision)", () => {
       const indexContent = state().files["index.ts"];
       const utilsContent = state().files["utils.ts"];
-      state().renameFile("utils.ts", "index.ts");
+      state().actions.renameFile("utils.ts", "index.ts");
       // Both files should remain unmodified
       expect(state().files["utils.ts"]).toBe(utilsContent);
       expect(state().files["index.ts"]).toBe(indexContent);
@@ -138,7 +138,7 @@ describe("sandboxStore", () => {
   // ── Terminal / Logs ─────────────────────────────────────────────────
   describe("logs", () => {
     it("addLog appends entries with auto-generated id and timestamp", () => {
-      state().addLog({ type: "log", message: "hello" });
+      state().actions.addLog({ type: "log", message: "hello" });
       const [log] = state().logs;
       expect(log.type).toBe("log");
       expect(log.message).toBe("hello");
@@ -147,27 +147,27 @@ describe("sandboxStore", () => {
     });
 
     it("preserves insertion order across multiple logs", () => {
-      state().addLog({ type: "log", message: "first" });
-      state().addLog({ type: "warn", message: "second" });
-      state().addLog({ type: "error", message: "third" });
+      state().actions.addLog({ type: "log", message: "first" });
+      state().actions.addLog({ type: "warn", message: "second" });
+      state().actions.addLog({ type: "error", message: "third" });
       const messages = state().logs.map((l) => l.message);
       expect(messages).toEqual(["first", "second", "third"]);
     });
 
     it("generates unique IDs even for consecutive identical logs", () => {
-      state().addLog({ type: "log", message: "same" });
-      state().addLog({ type: "log", message: "same" });
+      state().actions.addLog({ type: "log", message: "same" });
+      state().actions.addLog({ type: "log", message: "same" });
       const [a, b] = state().logs;
       expect(a.id).not.toBe(b.id);
     });
 
     it("clearLogs resets to empty array (idempotent)", () => {
-      state().addLog({ type: "log", message: "one" });
-      state().addLog({ type: "error", message: "two" });
-      state().clearLogs();
+      state().actions.addLog({ type: "log", message: "one" });
+      state().actions.addLog({ type: "error", message: "two" });
+      state().actions.clearLogs();
       expect(state().logs).toHaveLength(0);
       // Calling again is safe
-      state().clearLogs();
+      state().actions.clearLogs();
       expect(state().logs).toHaveLength(0);
     });
   });
@@ -182,16 +182,16 @@ describe("sandboxStore", () => {
         "idle",
       ];
       lifecycle.forEach((s) => {
-        state().setExecutionStatus(s);
+        state().actions.setExecutionStatus(s);
         expect(state().executionStatus).toBe(s);
       });
     });
 
     it("supports error recovery: idle → bundling → error → idle", () => {
-      state().setExecutionStatus("bundling");
-      state().setExecutionStatus("error");
+      state().actions.setExecutionStatus("bundling");
+      state().actions.setExecutionStatus("error");
       expect(state().executionStatus).toBe("error");
-      state().setExecutionStatus("idle");
+      state().actions.setExecutionStatus("idle");
       expect(state().executionStatus).toBe("idle");
     });
   });
@@ -199,11 +199,11 @@ describe("sandboxStore", () => {
   // ── Cross-cutting state interactions ────────────────────────────────
   describe("state interactions", () => {
     it("file operations do not affect logs or execution status", () => {
-      state().addLog({ type: "log", message: "before" });
-      state().setExecutionStatus("running");
+      state().actions.addLog({ type: "log", message: "before" });
+      state().actions.setExecutionStatus("running");
 
-      state().createFile("new.ts", "code");
-      state().deleteFile("utils.ts");
+      state().actions.createFile("new.ts", "code");
+      state().actions.deleteFile("utils.ts");
 
       expect(state().logs).toHaveLength(1);
       expect(state().logs[0].message).toBe("before");
@@ -212,8 +212,8 @@ describe("sandboxStore", () => {
 
     it("log operations do not affect files", () => {
       const filesBefore = { ...state().files };
-      state().addLog({ type: "log", message: "msg" });
-      state().clearLogs();
+      state().actions.addLog({ type: "log", message: "msg" });
+      state().actions.clearLogs();
       expect(state().files).toEqual(filesBefore);
     });
   });

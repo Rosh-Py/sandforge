@@ -3,13 +3,6 @@
  *
  * Tests that the Terminal component correctly renders log entries from the
  * store, and that user interactions (clear button) feed back into the store.
- *
- * Why these matter:
- *   - Terminal is the only feedback surface. If log rendering breaks,
- *     users see nothing when their code runs — a silent, catastrophic UX failure.
- *   - Log types drive CSS classes for coloring. Wrong class mapping makes
- *     errors look like info, destroying the debugging experience.
- *   - Auto-scroll behavior is critical for UX but invisible in unit tests.
  */
 import { describe, it, expect, beforeEach } from "vitest";
 import {
@@ -48,8 +41,8 @@ describe("Terminal ↔ Store integration", () => {
   // ── Log rendering ────────────────────────────────────────────────
 
   it("renders log entries from the store", () => {
-    state().addLog({ type: "log", message: "hello world" });
-    state().addLog({ type: "error", message: "something broke" });
+    state().actions.addLog({ type: "log", message: "hello world" });
+    state().actions.addLog({ type: "error", message: "something broke" });
 
     render(<Terminal />);
 
@@ -58,7 +51,7 @@ describe("Terminal ↔ Store integration", () => {
   });
 
   it("hides empty state message when logs are present", () => {
-    state().addLog({ type: "log", message: "output" });
+    state().actions.addLog({ type: "log", message: "output" });
 
     render(<Terminal />);
 
@@ -68,11 +61,11 @@ describe("Terminal ↔ Store integration", () => {
   });
 
   it("applies correct CSS class for each log type", () => {
-    state().addLog({ type: "log", message: "log-msg" });
-    state().addLog({ type: "warn", message: "warn-msg" });
-    state().addLog({ type: "error", message: "error-msg" });
-    state().addLog({ type: "info", message: "info-msg" });
-    state().addLog({ type: "system", message: "system-msg" });
+    state().actions.addLog({ type: "log", message: "log-msg" });
+    state().actions.addLog({ type: "warn", message: "warn-msg" });
+    state().actions.addLog({ type: "error", message: "error-msg" });
+    state().actions.addLog({ type: "info", message: "info-msg" });
+    state().actions.addLog({ type: "system", message: "system-msg" });
 
     render(<Terminal />);
 
@@ -95,11 +88,11 @@ describe("Terminal ↔ Store integration", () => {
   });
 
   it("renders correct prefix icons for each log type", () => {
-    state().addLog({ type: "log", message: "log-prefix" });
-    state().addLog({ type: "warn", message: "warn-prefix" });
-    state().addLog({ type: "error", message: "error-prefix" });
-    state().addLog({ type: "info", message: "info-prefix" });
-    state().addLog({ type: "system", message: "system-prefix" });
+    state().actions.addLog({ type: "log", message: "log-prefix" });
+    state().actions.addLog({ type: "warn", message: "warn-prefix" });
+    state().actions.addLog({ type: "error", message: "error-prefix" });
+    state().actions.addLog({ type: "info", message: "info-prefix" });
+    state().actions.addLog({ type: "system", message: "system-prefix" });
 
     render(<Terminal />);
 
@@ -110,9 +103,9 @@ describe("Terminal ↔ Store integration", () => {
   });
 
   it("preserves log ordering (insertion order)", () => {
-    state().addLog({ type: "log", message: "first" });
-    state().addLog({ type: "log", message: "second" });
-    state().addLog({ type: "log", message: "third" });
+    state().actions.addLog({ type: "log", message: "first" });
+    state().actions.addLog({ type: "log", message: "second" });
+    state().actions.addLog({ type: "log", message: "third" });
 
     render(<Terminal />);
 
@@ -124,7 +117,7 @@ describe("Terminal ↔ Store integration", () => {
   // ── Clear button ──────────────────────────────────────────────────
 
   it("shows clear button when logs are present", () => {
-    state().addLog({ type: "log", message: "msg" });
+    state().actions.addLog({ type: "log", message: "msg" });
 
     render(<Terminal />);
 
@@ -132,7 +125,7 @@ describe("Terminal ↔ Store integration", () => {
   });
 
   it("clicking clear button empties logs in the store and re-renders empty state", () => {
-    state().addLog({ type: "log", message: "will be cleared" });
+    state().actions.addLog({ type: "log", message: "will be cleared" });
 
     render(<Terminal />);
 
@@ -152,7 +145,7 @@ describe("Terminal ↔ Store integration", () => {
 
     // Mutate store externally
     act(() => {
-      state().addLog({ type: "log", message: "late arrival" });
+      state().actions.addLog({ type: "log", message: "late arrival" });
     });
 
     // Component should reactively update (Zustand subscription)
@@ -165,7 +158,7 @@ describe("Terminal ↔ Store integration", () => {
 
   it("renders many logs without crashing", () => {
     for (let i = 0; i < 100; i++) {
-      state().addLog({ type: "log", message: `log-${i}` });
+      state().actions.addLog({ type: "log", message: `log-${i}` });
     }
 
     render(<Terminal />);

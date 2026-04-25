@@ -199,7 +199,7 @@ describe("FileExplorer ↔ Store integration", () => {
 
   it("hides delete buttons when only one file remains", () => {
     // Delete one file via store to leave only one
-    state().deleteFile("utils.ts");
+    state().actions.deleteFile("utils.ts");
 
     render(<FileExplorer />);
 

@@ -111,9 +111,11 @@ const mockSetExecutionStatus = vi.fn();
 vi.mock("../../store/sandboxStore", () => ({
   useSandboxStore: {
     getState: () => ({
-      addLog: mockAddLog,
-      clearLogs: mockClearLogs,
-      setExecutionStatus: mockSetExecutionStatus,
+      actions: {
+        addLog: mockAddLog,
+        clearLogs: mockClearLogs,
+        setExecutionStatus: mockSetExecutionStatus,
+      },
     }),
   },
 }));

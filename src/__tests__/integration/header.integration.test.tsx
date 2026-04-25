@@ -35,7 +35,7 @@ describe("Header ↔ Store integration", () => {
   });
 
   it('shows "Ready" once bundler is ready and status is idle', () => {
-    state().setBundlerReady(true);
+    state().actions.setBundlerReady(true);
 
     render(<Header />);
     expect(screen.getByText("Ready")).toBeInTheDocument();
@@ -48,16 +48,16 @@ describe("Header ↔ Store integration", () => {
     ["success", "Done"],
     ["idle", "Ready"],
   ])('shows "%s" text for execution status "%s"', (status, expectedText) => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus(status);
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus(status);
 
     render(<Header />);
     expect(screen.getByText(expectedText)).toBeInTheDocument();
   });
 
   it("uses running dot class during bundling/running states", () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("bundling");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("bundling");
 
     render(<Header />);
 
@@ -66,8 +66,8 @@ describe("Header ↔ Store integration", () => {
   });
 
   it("uses error dot class during error state", () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("error");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("error");
 
     render(<Header />);
 
@@ -83,8 +83,8 @@ describe("Header ↔ Store integration", () => {
   });
 
   it("uses no special dot class in idle/success states", () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("idle");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("idle");
 
     render(<Header />);
 
@@ -104,14 +104,14 @@ describe("EditorToolbar ↔ Store integration", () => {
   });
 
   it("shows the active file name as a tab", () => {
-    state().setActiveFile("index.ts");
+    state().actions.setActiveFile("index.ts");
 
     render(<EditorToolbar onRun={mockOnRun} />);
     expect(screen.getByText("index.ts")).toBeInTheDocument();
   });
 
   it("updates tab label when active file changes in store", () => {
-    state().setActiveFile("utils.ts");
+    state().actions.setActiveFile("utils.ts");
 
     render(<EditorToolbar onRun={mockOnRun} />);
     expect(screen.getByText("utils.ts")).toBeInTheDocument();
@@ -128,8 +128,8 @@ describe("EditorToolbar ↔ Store integration", () => {
   });
 
   it("enables run button when bundler is ready and not running", () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("idle");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("idle");
 
     render(<EditorToolbar onRun={mockOnRun} />);
 
@@ -138,8 +138,8 @@ describe("EditorToolbar ↔ Store integration", () => {
   });
 
   it("disables run button while bundling", () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("bundling");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("bundling");
 
     render(<EditorToolbar onRun={mockOnRun} />);
 
@@ -148,8 +148,8 @@ describe("EditorToolbar ↔ Store integration", () => {
   });
 
   it("disables run button while running", () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("running");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("running");
 
     render(<EditorToolbar onRun={mockOnRun} />);
 
@@ -158,8 +158,8 @@ describe("EditorToolbar ↔ Store integration", () => {
   });
 
   it("re-enables run button after execution completes (success)", () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("success");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("success");
 
     render(<EditorToolbar onRun={mockOnRun} />);
 
@@ -168,8 +168,8 @@ describe("EditorToolbar ↔ Store integration", () => {
   });
 
   it("re-enables run button after execution fails (error)", () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("error");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("error");
 
     render(<EditorToolbar onRun={mockOnRun} />);
 
@@ -180,8 +180,8 @@ describe("EditorToolbar ↔ Store integration", () => {
   // ── Run button click ──────────────────────────────────────────────
 
   it("calls onRun when clicked and button is enabled", () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("idle");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("idle");
 
     render(<EditorToolbar onRun={mockOnRun} />);
 
@@ -200,16 +200,16 @@ describe("EditorToolbar ↔ Store integration", () => {
   // ── Button text changes ───────────────────────────────────────────
 
   it('shows "Run" text in idle/success/error states', () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("idle");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("idle");
 
     render(<EditorToolbar onRun={mockOnRun} />);
     expect(screen.getByText("Run")).toBeInTheDocument();
   });
 
   it('shows "Running..." text during bundling/running', () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("bundling");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("bundling");
 
     render(<EditorToolbar onRun={mockOnRun} />);
     expect(screen.getByText("Running...")).toBeInTheDocument();
@@ -218,8 +218,8 @@ describe("EditorToolbar ↔ Store integration", () => {
   // ── Running class applied ─────────────────────────────────────────
 
   it("applies running CSS class when executing", () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("running");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("running");
 
     render(<EditorToolbar onRun={mockOnRun} />);
 
@@ -228,8 +228,8 @@ describe("EditorToolbar ↔ Store integration", () => {
   });
 
   it("does not apply running CSS class when idle", () => {
-    state().setBundlerReady(true);
-    state().setExecutionStatus("idle");
+    state().actions.setBundlerReady(true);
+    state().actions.setExecutionStatus("idle");
 
     render(<EditorToolbar onRun={mockOnRun} />);
 

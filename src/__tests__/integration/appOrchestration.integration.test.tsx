@@ -150,7 +150,7 @@ describe("App — handleRun orchestration", () => {
     await renderAndWaitForReady();
 
     // Add a pre-existing log
-    state().addLog({ type: "log", message: "old log" });
+    state().actions.addLog({ type: "log", message: "old log" });
 
     // Use getByRole to find the Run button — accessible and resilient
     const runBtn = screen.getByRole("button", { name: /^run$/i });
@@ -288,7 +288,7 @@ describe("App — handleRun orchestration", () => {
     // Modify a file after render — wrap in act to trigger re-render
     // so the component's useCallback picks up the new `files` from the store
     await act(async () => {
-      state().updateFileContent("index.ts", "const updated = true;");
+      state().actions.updateFileContent("index.ts", "const updated = true;");
     });
 
     const runBtn = screen.getByRole("button", { name: /^run$/i });

@@ -29,23 +29,26 @@ interface SandboxState {
   isCreatingFile: boolean;
   isBundlerReady: boolean;
 
-  // File operations
-  createFile: (name: string, content?: string) => void;
-  deleteFile: (name: string) => void;
-  setActiveFile: (name: string) => void;
-  updateFileContent: (name: string, content: string) => void;
-  renameFile: (oldName: string, newName: string) => void;
+  // Actions
+  actions: {
+    // File operations
+    createFile: (name: string, content?: string) => void;
+    deleteFile: (name: string) => void;
+    setActiveFile: (name: string) => void;
+    updateFileContent: (name: string, content: string) => void;
+    renameFile: (oldName: string, newName: string) => void;
 
-  // Terminal operations
-  addLog: (entry: Omit<LogEntry, "id" | "timestamp">) => void;
-  clearLogs: () => void;
+    // Terminal operations
+    addLog: (entry: Omit<LogEntry, "id" | "timestamp">) => void;
+    clearLogs: () => void;
 
-  // Execution
-  setExecutionStatus: (status: ExecutionStatus) => void;
+    // Execution
+    setExecutionStatus: (status: ExecutionStatus) => void;
 
-  // UI
-  setIsCreatingFile: (val: boolean) => void;
-  setBundlerReady: (val: boolean) => void;
+    // UI
+    setIsCreatingFile: (val: boolean) => void;
+    setBundlerReady: (val: boolean) => void;
+  };
 }
 
 // Unique ID generator
@@ -85,76 +88,78 @@ export const useSandboxStore = create<SandboxState>((set, get) => ({
   isCreatingFile: false,
   isBundlerReady: false,
 
-  // --- File operations ---
-  createFile: (name: string, content = "") => {
-    const { files } = get();
-    if (files[name]) return; // already exists
-    set({
-      files: { ...files, [name]: content },
-      activeFile: name,
-      isCreatingFile: false,
-    });
-  },
+  actions: {
+    // --- File operations ---
+    createFile: (name: string, content = "") => {
+      const { files } = get();
+      if (files[name]) return; // already exists
+      set({
+        files: { ...files, [name]: content },
+        activeFile: name,
+        isCreatingFile: false,
+      });
+    },
 
-  deleteFile: (name: string) => {
-    const { files, activeFile } = get();
-    const updated = { ...files };
-    delete updated[name];
+    deleteFile: (name: string) => {
+      const { files, activeFile } = get();
+      const updated = { ...files };
+      delete updated[name];
 
-    const remaining = Object.keys(updated);
-    set({
-      files: updated,
-      activeFile: name === activeFile ? (remaining[0] ?? "") : activeFile,
-    });
-  },
+      const remaining = Object.keys(updated);
+      set({
+        files: updated,
+        activeFile: name === activeFile ? (remaining[0] ?? "") : activeFile,
+      });
+    },
 
-  setActiveFile: (name: string) => {
-    set({ activeFile: name });
-  },
+    setActiveFile: (name: string) => {
+      set({ activeFile: name });
+    },
 
-  updateFileContent: (name: string, content: string) => {
-    const { files } = get();
-    set({ files: { ...files, [name]: content } });
-  },
+    updateFileContent: (name: string, content: string) => {
+      const { files } = get();
+      set({ files: { ...files, [name]: content } });
+    },
 
-  renameFile: (oldName: string, newName: string) => {
-    const { files, activeFile } = get();
-    if (files[newName]) return;
-    const content = files[oldName];
-    const updated = { ...files };
-    delete updated[oldName];
-    updated[newName] = content;
-    set({
-      files: updated,
-      activeFile: activeFile === oldName ? newName : activeFile,
-    });
-  },
+    renameFile: (oldName: string, newName: string) => {
+      const { files, activeFile } = get();
+      if (files[newName]) return;
+      const content = files[oldName];
+      const updated = { ...files };
+      delete updated[oldName];
+      updated[newName] = content;
+      set({
+        files: updated,
+        activeFile: activeFile === oldName ? newName : activeFile,
+      });
+    },
 
-  // --- Terminal ---
-  addLog: (entry) => {
-    set((state) => ({
-      logs: [
-        ...state.logs,
-        { ...entry, id: generateId(), timestamp: Date.now() },
-      ],
-    }));
-  },
+    // --- Terminal ---
+    addLog: (entry) => {
+      set((state) => ({
+        logs: [
+          ...state.logs,
+          { ...entry, id: generateId(), timestamp: Date.now() },
+        ],
+      }));
+    },
 
-  clearLogs: () => {
-    set({ logs: [] });
-  },
+    clearLogs: () => {
+      set({ logs: [] });
+    },
 
-  // --- Execution ---
-  setExecutionStatus: (status) => {
-    set({ executionStatus: status });
-  },
+    // --- Execution ---
+    setExecutionStatus: (status) => {
+      set({ executionStatus: status });
+    },
 
-  // --- UI ---
-  setIsCreatingFile: (val) => {
-    set({ isCreatingFile: val });
-  },
+    // --- UI ---
+    setIsCreatingFile: (val) => {
+      set({ isCreatingFile: val });
+    },
 
-  setBundlerReady: (val) => {
-    set({ isBundlerReady: val });
+    setBundlerReady: (val) => {
+      set({ isBundlerReady: val });
+    },
   },
 }));
