@@ -193,7 +193,7 @@ describe("executor — sandbox lifecycle", () => {
     expect(document.querySelectorAll("iframe")).toHaveLength(1);
   });
 
-  it('handles "done" message: sets status to success and schedules cleanup', () => {
+  it('handles "done" message: sets status to success', () => {
     executeInSandbox('console.log("test")');
 
     const doneEvent = new MessageEvent("message", {
@@ -203,12 +203,11 @@ describe("executor — sandbox lifecycle", () => {
 
     expect(mockSetExecutionStatus).toHaveBeenCalledWith("success");
 
-    // Iframe should still exist (kept alive for async logs)
+    // Iframe should still exist (no longer cleaned up after 3s)
     expect(document.querySelectorAll("iframe")).toHaveLength(1);
 
-    // After 3s, iframe should be cleaned up
     vi.advanceTimersByTime(3000);
-    expect(document.querySelectorAll("iframe")).toHaveLength(0);
+    expect(document.querySelectorAll("iframe")).toHaveLength(1);
   });
 
   it('handles "clear" message: calls clearLogs on the store', () => {
@@ -262,37 +261,69 @@ describe("executor — sandbox lifecycle", () => {
     expect(mockAddLog).not.toHaveBeenCalled();
   });
 
-  it("triggers timeout after 10s and sets error status", () => {
-    executeInSandbox("while(true) {}");
+  it("triggers boot timeout after 15s if sandbox fails to respond", () => {
+    executeInSandbox("invalid code");
 
-    vi.advanceTimersByTime(10000);
+    vi.advanceTimersByTime(16000); // 15s threshold + 1s buffer
 
-    expect(mockAddLog).toHaveBeenCalledWith(
+    expect(mockAddLog).toHaveBeenLastCalledWith(
       expect.objectContaining({
         type: "error",
-        message: expect.stringContaining("timeout"),
+        message: expect.stringContaining("initialize"),
       }),
     );
     expect(mockSetExecutionStatus).toHaveBeenCalledWith("error");
     expect(document.querySelectorAll("iframe")).toHaveLength(0);
   });
 
-  it('"done" message cancels the timeout', () => {
-    executeInSandbox('console.log("fast")');
+  it("triggers heartbeat timeout after 5s once initialized", () => {
+    executeInSandbox('console.log("test")');
 
-    // Send "done" before timeout
-    const doneEvent = new MessageEvent("message", {
-      data: { source: SANDBOX_SOURCE, type: "done" },
-    });
-    window.dispatchEvent(doneEvent);
-
-    // Advance past the 10s timeout
-    vi.advanceTimersByTime(10000);
-
-    // Should NOT have set status to 'error'
-    const errorCalls = mockSetExecutionStatus.mock.calls.filter(
-      (call: unknown[]) => call[0] === "error",
+    // Signal initialization
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        data: { source: SANDBOX_SOURCE, type: "system", message: "starting" },
+      }),
     );
-    expect(errorCalls).toHaveLength(0);
+
+    // Move past the threshold without any more messages
+    vi.advanceTimersByTime(6000); // 5s threshold + 1s buffer
+
+    expect(mockAddLog).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        type: "error",
+        message: expect.stringContaining("stalled"),
+      }),
+    );
+    expect(mockSetExecutionStatus).toHaveBeenCalledWith("error");
+    expect(document.querySelectorAll("iframe")).toHaveLength(0);
+  });
+
+  it("any message from sandbox resets the heartbeat timer", () => {
+    executeInSandbox('console.log("test")');
+
+    // Initialize
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        data: { source: SANDBOX_SOURCE, type: "system", message: "starting" },
+      }),
+    );
+
+    // Advance 4s (just under the 5s threshold)
+    vi.advanceTimersByTime(4000);
+
+    // Send a message
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        data: { source: SANDBOX_SOURCE, type: "log", message: "I'm alive" },
+      }),
+    );
+
+    // Advance another 4s
+    vi.advanceTimersByTime(4000);
+
+    // Should NOT have timed out
+    expect(mockSetExecutionStatus).not.toHaveBeenCalledWith("error");
+    expect(document.querySelectorAll("iframe")).toHaveLength(1);
   });
 });

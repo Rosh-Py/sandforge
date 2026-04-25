@@ -126,16 +126,16 @@ describe("Executor ↔ Store full integration", () => {
     expect(state().logs).toHaveLength(0);
   });
 
-  it('timeout sets status to "error" and adds timeout log to store', () => {
-    executeInSandbox("while(true){}");
+  it('timeout sets status to "error" if sandbox fails to initialize', () => {
+    executeInSandbox("void 0");
 
-    vi.advanceTimersByTime(10000);
+    vi.advanceTimersByTime(16000); // 15s boot timeout + 1s buffer
 
     expect(state().executionStatus).toBe("error");
 
     const errorLogs = state().logs.filter((l) => l.type === "error");
     expect(errorLogs).toHaveLength(1);
-    expect(errorLogs[0].message).toContain("timeout");
+    expect(errorLogs[0].message).toContain("initialize");
   });
 
   it("rapid-fire messages maintain insertion order in store", () => {
@@ -187,27 +187,30 @@ describe("Executor ↔ Store full integration", () => {
     expect(state().logs).toHaveLength(0);
   });
 
-  it("done message cancels the 10s timeout to prevent false error", () => {
+  it("any message from sandbox prevents timeout", () => {
     executeInSandbox("void 0");
 
-    // Send "done" at 5s
-    vi.advanceTimersByTime(5000);
+    // Initialize
     window.dispatchEvent(
       new MessageEvent("message", {
-        data: { source: SANDBOX_SOURCE, type: "done" },
+        data: { source: SANDBOX_SOURCE, type: "system", message: "ready" },
       }),
     );
 
-    expect(state().executionStatus).toBe("success");
+    expect(state().executionStatus).toBe("running");
 
-    // Advance past the 10s mark
-    vi.advanceTimersByTime(5000);
+    // Advance 4s (just under the 5s heartbeat threshold)
+    vi.advanceTimersByTime(4000);
 
-    // Status should NOT be 'error' — the timeout was cancelled
-    expect(state().executionStatus).toBe("success");
+    // Should NOT be an error
+    expect(state().executionStatus).not.toBe("error");
+
+    // Advance another 2s -> total 6s since last message -> should error
+    vi.advanceTimersByTime(2000);
+    expect(state().executionStatus).toBe("error");
     expect(
-      state().logs.filter((l) => l.message.includes("timeout")),
-    ).toHaveLength(0);
+      state().logs.filter((l) => l.message.includes("stalled")),
+    ).toHaveLength(1);
   });
 
   it('unknown message types fall back to "log" type in the store', () => {

@@ -32,10 +32,15 @@ interface SandboxClearMessage extends SandboxMessageBase {
   type: "clear";
 }
 
+interface SandboxPongMessage extends SandboxMessageBase {
+  type: "pong";
+}
+
 type SandboxMessage =
   | SandboxLogMessage
   | SandboxDoneMessage
-  | SandboxClearMessage;
+  | SandboxClearMessage
+  | SandboxPongMessage;
 
 export function isSandboxMessage(data: unknown): data is SandboxMessage {
   if (typeof data !== "object" || data === null) return false;
@@ -99,6 +104,13 @@ function createSandboxHTML(code: string): string {
     window.onunhandledrejection = (event) => {
       sendToParent('error', ['Unhandled Promise Rejection: ' + (event.reason?.stack || event.reason?.message || event.reason)]);
     };
+
+    // Heartbeat responder
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.source === '${SANDBOX_SOURCE}' && e.data.type === 'ping') {
+        window.parent.postMessage({ source: '${SANDBOX_SOURCE}', type: 'pong' }, '*');
+      }
+    });
     
     // Signal that we're starting
     window.parent.postMessage({ source: '${SANDBOX_SOURCE}', type: 'system', message: '🏃 Execution started...' }, '*');
@@ -108,13 +120,13 @@ function createSandboxHTML(code: string): string {
       ${code}
       // Signal completion after sync code finishes
       // (async operations will still run and post messages)
-      window.parent.postMessage({ source: '${SANDBOX_SOURCE}', type: 'done' }, '*');
     } catch (err) {
       window.parent.postMessage({
         source: '${SANDBOX_SOURCE}',
         type: 'error',
         message: err.stack || err.message || String(err),
       }, '*');
+    } finally {
       window.parent.postMessage({ source: '${SANDBOX_SOURCE}', type: 'done' }, '*');
     }
   <\/script>
@@ -125,6 +137,9 @@ function createSandboxHTML(code: string): string {
 
 let currentIframe: HTMLIFrameElement | null = null;
 let messageHandler: ((e: MessageEvent) => void) | null = null;
+let heartbeatInterval: number | null = null;
+let lastPongAt = 0;
+let isSandboxReady = false;
 
 /**
  * Execute bundled code in a sandboxed iframe.
@@ -144,32 +159,60 @@ export function executeInSandbox(code: string): void {
   document.body.appendChild(iframe);
   currentIframe = iframe;
 
-  // Listen for messages from the sandbox
-  const timeoutId = setTimeout(() => {
-    actions.addLog({
-      type: "error",
-      message:
-        "⏱ Execution timeout (10s). Possible infinite loop detected. Sandbox terminated.",
-    });
-    actions.setExecutionStatus("error");
-    destroySandbox();
-  }, 10000);
+  // Track responsiveness with a heartbeat
+  lastPongAt = Date.now();
+  isSandboxReady = false; // Reset for new execution
+  heartbeatInterval = window.setInterval(() => {
+    if (currentIframe?.contentWindow) {
+      currentIframe.contentWindow.postMessage(
+        { source: SANDBOX_SOURCE, type: "ping" },
+        "*",
+      );
+
+      // Use a more generous timeout during the initial boot (15s)
+      // but switch to a strict heartbeat (5s) once the sandbox is responsive.
+      const threshold = isSandboxReady ? 5000 : 15000;
+
+      if (Date.now() - lastPongAt > threshold) {
+        actions.addLog({
+          type: "error",
+          message: isSandboxReady
+            ? "🛑 Execution stalled (Event loop blocked). Possible infinite loop detected."
+            : "⏱ Sandbox failed to initialize in time (15s).",
+        });
+        actions.setExecutionStatus("error");
+        destroySandbox();
+      }
+    }
+  }, 2000);
 
   messageHandler = (event: MessageEvent) => {
     const data: unknown = event.data;
     if (!isSandboxMessage(data)) return;
 
+    // Any valid message from the sandbox proves the event loop is alive
+    lastPongAt = Date.now();
+
+    if (data.type === "pong") {
+      isSandboxReady = true;
+      return;
+    }
+
     if (data.type === "done") {
-      clearTimeout(timeoutId);
-      actions.setExecutionStatus("success");
-      // Keep iframe alive for a bit to catch async logs
-      setTimeout(() => destroySandbox(), 3000);
+      const { executionStatus } = useSandboxStore.getState();
+      if (executionStatus !== "error") {
+        actions.setExecutionStatus("success");
+      }
       return;
     }
 
     if (data.type === "clear") {
       actions.clearLogs();
       return;
+    }
+
+    if (data.type === "system") {
+      isSandboxReady = true;
     }
 
     actions.addLog({
@@ -190,6 +233,10 @@ export function executeInSandbox(code: string): void {
  * Destroy the current sandbox iframe and clean up listeners.
  */
 export function destroySandbox(): void {
+  if (heartbeatInterval) {
+    clearInterval(heartbeatInterval);
+    heartbeatInterval = null;
+  }
   if (messageHandler) {
     window.removeEventListener("message", messageHandler);
     messageHandler = null;
