@@ -1,9 +1,11 @@
 import { useEffect, useCallback, useState } from "react";
+import { Group, Panel } from "react-resizable-panels";
 import { APP_NAME_UPPER } from "./constants";
 import { Header, EditorToolbar } from "./components/Header";
 import { FileExplorer } from "./components/FileExplorer";
 import { CodeEditor } from "./components/CodeEditor";
 import { Terminal } from "./components/Terminal";
+import { ResizeHandleH, ResizeHandleV } from "./components/ResizeHandle";
 import { useSandboxStore } from "./store/sandboxStore";
 import { initBundler, bundle } from "./services/bundler";
 import { executeInSandbox } from "./services/executor";
@@ -100,16 +102,70 @@ export default function App() {
     return <LoadingScreen />;
   }
 
+  // ── localStorage persistence helpers ──
+  const loadLayout = (key: string): Record<string, number> | undefined => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+  const saveLayout = (key: string, layout: Record<string, number>) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(layout));
+    } catch {
+      /* quota */
+    }
+  };
+
   return (
     <div className="bg-bg-primary app-container relative flex h-screen w-screen flex-col overflow-hidden">
       <Header />
-      <main className="flex flex-1 overflow-hidden" role="main">
-        <FileExplorer />
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <EditorToolbar onRun={handleRun} />
-          <CodeEditor />
-          <Terminal />
-        </div>
+      <main className="min-h-0 flex-1 overflow-hidden" role="main">
+        <Group
+          id="sf-h"
+          orientation="horizontal"
+          defaultLayout={loadLayout("sf-h-2")}
+          onLayoutChanged={(l) => saveLayout("sf-h-2", l)}
+          className="h-full"
+        >
+          {/* ── Sidebar ── */}
+          <Panel defaultSize="20%" minSize="12%" maxSize="35%" id="sidebar">
+            <FileExplorer />
+          </Panel>
+
+          <ResizeHandleH />
+
+          {/* ── Editor + Terminal column ── */}
+          <Panel defaultSize="80%" minSize="40%" id="main-col">
+            <Group
+              id="sf-v"
+              orientation="vertical"
+              defaultLayout={loadLayout("sf-v-2")}
+              onLayoutChanged={(l) => saveLayout("sf-v-2", l)}
+              className="h-full"
+            >
+              <Panel defaultSize="70%" minSize="20%" id="editor">
+                <div className="flex h-full min-h-0 flex-col overflow-hidden">
+                  <EditorToolbar onRun={handleRun} />
+                  <CodeEditor />
+                </div>
+              </Panel>
+
+              <ResizeHandleV />
+
+              <Panel
+                defaultSize="30%"
+                minSize="10%"
+                maxSize="60%"
+                id="terminal"
+              >
+                <Terminal />
+              </Panel>
+            </Group>
+          </Panel>
+        </Group>
       </main>
     </div>
   );

@@ -32,7 +32,7 @@ export function Terminal() {
   };
 
   return (
-    <div className="bg-bg-secondary border-border-color terminal-container relative flex h-[240px] shrink-0 flex-col border-t">
+    <div className="bg-bg-secondary border-border-color terminal-container relative flex h-full flex-col border-t">
       <div className="border-border-color flex items-center justify-between border-b px-[14px] py-[8px]">
         <div className="text-text-secondary flex items-center gap-[8px] font-mono text-[11px] font-[600] tracking-[1.5px] uppercase">
           <TerminalIcon size={13} className="text-neon-green" />

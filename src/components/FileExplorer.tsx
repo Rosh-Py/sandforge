@@ -90,7 +90,7 @@ export function FileExplorer() {
   };
 
   return (
-    <aside className="bg-bg-secondary border-border-color sidebar relative flex w-[260px] shrink-0 flex-col border-r">
+    <aside className="bg-bg-secondary border-border-color sidebar relative flex h-full w-full flex-col border-r">
       <div className="border-border-color flex items-center justify-between border-b px-[14px] py-[12px]">
         <span className="text-text-secondary flex items-center font-mono text-[11px] font-[600] tracking-[1.5px] uppercase">
           <ChevronRight size={12} style={{ opacity: 0.5 }} /> Explorer
