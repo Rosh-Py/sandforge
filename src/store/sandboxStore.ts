@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { getStorageItem, setStorageItem, STORAGE_KEYS } from "../utils/storage";
 
 // --- Types ---
 
@@ -28,6 +29,7 @@ interface SandboxState {
   // UI state
   isCreatingFile: boolean;
   isBundlerReady: boolean;
+  layout: "vertical" | "horizontal";
 
   // Actions
   actions: {
@@ -48,6 +50,7 @@ interface SandboxState {
     // UI
     setIsCreatingFile: (val: boolean) => void;
     setBundlerReady: (val: boolean) => void;
+    setLayout: (layout: "vertical" | "horizontal") => void;
   };
 }
 
@@ -79,6 +82,11 @@ export function add(a: number, b: number): number {
 `,
 };
 
+const getInitialLayout = (): "vertical" | "horizontal" => {
+  const val = getStorageItem(STORAGE_KEYS.ORIENTATION);
+  return val === "vertical" ? "vertical" : "horizontal";
+};
+
 export const useSandboxStore = create<SandboxState>((set, get) => ({
   // Initial state
   files: { ...DEFAULT_FILES },
@@ -87,6 +95,7 @@ export const useSandboxStore = create<SandboxState>((set, get) => ({
   executionStatus: "idle",
   isCreatingFile: false,
   isBundlerReady: false,
+  layout: getInitialLayout(),
 
   actions: {
     // --- File operations ---
@@ -160,6 +169,11 @@ export const useSandboxStore = create<SandboxState>((set, get) => ({
 
     setBundlerReady: (val) => {
       set({ isBundlerReady: val });
+    },
+
+    setLayout: (layout) => {
+      setStorageItem(STORAGE_KEYS.ORIENTATION, layout);
+      set({ layout });
     },
   },
 }));

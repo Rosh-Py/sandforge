@@ -9,6 +9,7 @@ import { ResizeHandleH, ResizeHandleV } from "./components/ResizeHandle";
 import { useSandboxStore } from "./store/sandboxStore";
 import { initBundler, bundle } from "./services/bundler";
 import { executeInSandbox } from "./services/executor";
+import { getLayout, saveLayout, STORAGE_KEYS } from "./utils/storage";
 
 function LoadingScreen() {
   return (
@@ -33,6 +34,7 @@ function LoadingScreen() {
 export default function App() {
   const files = useSandboxStore((s) => s.files);
   const isBundlerReady = useSandboxStore((s) => s.isBundlerReady);
+  const layout = useSandboxStore((s) => s.layout);
   const { setBundlerReady, setExecutionStatus, addLog, clearLogs } =
     useSandboxStore((s) => s.actions);
 
@@ -103,31 +105,16 @@ export default function App() {
   }
 
   // ── localStorage persistence helpers ──
-  const loadLayout = (key: string): Record<string, number> | undefined => {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : undefined;
-    } catch {
-      return undefined;
-    }
-  };
-  const saveLayout = (key: string, layout: Record<string, number>) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(layout));
-    } catch {
-      /* quota */
-    }
-  };
 
   return (
     <div className="bg-bg-primary app-container relative flex h-screen w-screen flex-col overflow-hidden">
       <Header />
       <main className="min-h-0 flex-1 overflow-hidden" role="main">
         <Group
-          id="sf-h"
+          id="sf-sidebar-group"
           orientation="horizontal"
-          defaultLayout={loadLayout("sf-h-2")}
-          onLayoutChanged={(l) => saveLayout("sf-h-2", l)}
+          defaultLayout={getLayout(STORAGE_KEYS.LAYOUT_SIDEBAR)}
+          onLayoutChanged={(l) => saveLayout(STORAGE_KEYS.LAYOUT_SIDEBAR, l)}
           className="h-full"
         >
           {/* ── Sidebar ── */}
@@ -140,10 +127,21 @@ export default function App() {
           {/* ── Editor + Terminal column ── */}
           <Panel defaultSize="80%" minSize="40%" id="main-col">
             <Group
-              id="sf-v"
-              orientation="vertical"
-              defaultLayout={loadLayout("sf-v-2")}
-              onLayoutChanged={(l) => saveLayout("sf-v-2", l)}
+              id={`sf-editor-group-${layout}`}
+              orientation={layout}
+              defaultLayout={getLayout(
+                layout === "vertical"
+                  ? STORAGE_KEYS.LAYOUT_EDITOR_VERTICAL
+                  : STORAGE_KEYS.LAYOUT_EDITOR_HORIZONTAL,
+              )}
+              onLayoutChanged={(l) =>
+                saveLayout(
+                  layout === "vertical"
+                    ? STORAGE_KEYS.LAYOUT_EDITOR_VERTICAL
+                    : STORAGE_KEYS.LAYOUT_EDITOR_HORIZONTAL,
+                  l,
+                )
+              }
               className="h-full"
             >
               <Panel defaultSize="70%" minSize="20%" id="editor">
@@ -153,7 +151,7 @@ export default function App() {
                 </div>
               </Panel>
 
-              <ResizeHandleV />
+              {layout === "vertical" ? <ResizeHandleV /> : <ResizeHandleH />}
 
               <Panel
                 defaultSize="30%"

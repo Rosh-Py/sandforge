@@ -1,4 +1,4 @@
-import { Play, Square, Zap } from "lucide-react";
+import { Play, Square, Zap, LayoutTemplate, Layout } from "lucide-react";
 import { useSandboxStore } from "../store/sandboxStore";
 import { APP_NAME } from "../constants";
 
@@ -59,7 +59,9 @@ export function Header() {
         >
           <span
             data-testid="status-dot"
-            data-execution-status={!isBundlerReady ? "initializing" : executionStatus}
+            data-execution-status={
+              !isBundlerReady ? "initializing" : executionStatus
+            }
             className={`h-[6px] w-[6px] animate-[pulse-glow_2s_ease-in-out_infinite] rounded-full ${getStatusDotClass()}`}
           />
           {getStatusText()}
@@ -77,6 +79,8 @@ export function EditorToolbar({ onRun }: EditorToolbarProps) {
   const activeFile = useSandboxStore((s) => s.activeFile);
   const executionStatus = useSandboxStore((s) => s.executionStatus);
   const isBundlerReady = useSandboxStore((s) => s.isBundlerReady);
+  const layout = useSandboxStore((s) => s.layout);
+  const { setLayout } = useSandboxStore((s) => s.actions);
   const isRunning =
     executionStatus === "bundling" || executionStatus === "running";
 
@@ -91,24 +95,40 @@ export function EditorToolbar({ onRun }: EditorToolbarProps) {
         )}
       </div>
 
-      <button
-        data-testid="run-button"
-        data-is-running={isRunning}
-        className={`text-bg-primary from-neon-green to-neon-cyan group relative flex cursor-pointer items-center gap-[6px] overflow-hidden rounded-sm border-none bg-gradient-to-br px-[16px] py-[6px] font-mono text-[12px] font-[600] tracking-[1px] uppercase hover:-translate-y-[1px] hover:shadow-[0_0_16px_var(--color-neon-green-glow-strong),0_0_32px_var(--color-neon-green-glow)] active:translate-y-0 ${isRunning ? "from-neon-yellow to-neon-orange animate-[glow-pulse_1.5s_ease-in-out_infinite]" : ""}`}
-        onClick={onRun}
-        disabled={!isBundlerReady || isRunning}
-        title={
-          !isBundlerReady
-            ? "Bundler is initializing..."
-            : "Run code (Ctrl+Enter)"
-        }
-        aria-label={isRunning ? "Running..." : "Run"}
-      >
-        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          {isRunning ? <Square size={13} /> : <Play size={13} />}
-          {isRunning ? "Running..." : "Run"}
-        </span>
-      </button>
+      <div className="flex items-center gap-[8px]">
+        <button
+          onClick={() =>
+            setLayout(layout === "vertical" ? "horizontal" : "vertical")
+          }
+          className="text-text-secondary bg-bg-primary hover:text-text-primary border-border-color flex cursor-pointer items-center justify-center rounded-sm border p-[6px] transition-colors"
+          title={`Switch to ${layout === "vertical" ? "horizontal" : "vertical"} layout`}
+          aria-label="Toggle layout"
+        >
+          {layout === "vertical" ? (
+            <LayoutTemplate size={14} />
+          ) : (
+            <Layout size={14} />
+          )}
+        </button>
+        <button
+          data-testid="run-button"
+          data-is-running={isRunning}
+          className={`text-bg-primary from-neon-green to-neon-cyan group relative flex cursor-pointer items-center gap-[6px] overflow-hidden rounded-sm border-none bg-gradient-to-br px-[16px] py-[6px] font-mono text-[12px] font-[600] tracking-[1px] uppercase hover:-translate-y-[1px] hover:shadow-[0_0_16px_var(--color-neon-green-glow-strong),0_0_32px_var(--color-neon-green-glow)] active:translate-y-0 ${isRunning ? "from-neon-yellow to-neon-orange animate-[glow-pulse_1.5s_ease-in-out_infinite]" : ""}`}
+          onClick={onRun}
+          disabled={!isBundlerReady || isRunning}
+          title={
+            !isBundlerReady
+              ? "Bundler is initializing..."
+              : "Run code (Ctrl+Enter)"
+          }
+          aria-label={isRunning ? "Running..." : "Run"}
+        >
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {isRunning ? <Square size={13} /> : <Play size={13} />}
+            {isRunning ? "Running..." : "Run"}
+          </span>
+        </button>
+      </div>
     </div>
   );
 }
